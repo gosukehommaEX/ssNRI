@@ -1,8 +1,6 @@
 ---
 title: "Sample size for a trial analysed with non-responder imputation"
-output:
-  rmarkdown::html_vignette:
-    pandoc_args: ["--mathml"]
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Sample size for a trial analysed with non-responder imputation}
   %\VignetteEngine{knitr::rmarkdown}

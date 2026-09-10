@@ -30,14 +30,25 @@ This package accompanies the article
 
 ``` r
 # install.packages("pak")
-pak::pak("gosukehommaEX/ssNRI", build_vignettes = TRUE)
+pak::pak("gosukehommaEX/ssNRI")
 ```
 
-The vignette walks through the whole workflow on the trial the article uses as
-its application.
+The vignette walks through a whole design on the trial the article uses as its
+application. It is not built by the command above, so install with `remotes` if
+you want it.
 
 ``` r
+# install.packages("remotes")
+remotes::install_github("gosukehommaEX/ssNRI", build_vignettes = TRUE)
 vignette("ssNRI")
+```
+
+From a local checkout, `devtools::build_vignettes()` only renders into `doc/`,
+which is not installed, so `vignette("ssNRI")` finds nothing until the package
+itself is installed with the vignette built.
+
+``` r
+devtools::install(build_vignettes = TRUE)
 ```
 
 ## Exact operating characteristics
