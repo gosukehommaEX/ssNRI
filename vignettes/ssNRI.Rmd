@@ -1,0 +1,264 @@
+---
+title: "Sample size for a trial analysed with non-responder imputation"
+output:
+  rmarkdown::html_vignette:
+    pandoc_args: ["--mathml"]
+vignette: >
+  %\VignetteIndexEntry{Sample size for a trial analysed with non-responder imputation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6,
+                      fig.height = 4, fig.align = "center")
+```
+
+```{r setup}
+library(ssNRI)
+```
+
+## Two analyses, two estimands
+
+A trial with a binary endpoint and dropout can be analysed in two ways. A
+complete case analysis compares the response probabilities among those who
+complete. Non-responder imputation counts a dropout as a non-responder and
+compares
+
+$$p_{j,\mathrm{NRI}} = \Pr(R_{j} = 1, D_{j} = 0),$$
+
+where $R_{j}$ is the latent response indicator and $D_{j}$ the dropout
+indicator in group $j$. These are different quantities, and the difference is
+not a nuisance: the effect that an NRI analysis is powered to detect,
+$\delta_{\mathrm{NRI}} = p_{1,\mathrm{NRI}} - p_{2,\mathrm{NRI}}$, is not the
+effect a complete case analysis is powered to detect.
+
+The usual practice is to compute a sample size for a trial without dropout and
+inflate it by $1 / (1 - \omega)$. That adjustment restores the number of
+completers, which is what a complete case analysis needs. It does nothing about
+the change of estimand that NRI brings, so it is not the right adjustment when
+NRI is planned.
+
+`ssNRI` models $R_{j}$ and $D_{j}$ jointly as a bivariate Bernoulli distribution,
+which makes both estimands explicit and gives a closed-form sample size for
+each.
+
+## Two ways to state the same assumption
+
+The joint distribution needs one more parameter than the two marginal
+probabilities $p_{j}$ and $\omega_{j}$. It can be given as a correlation
+$\rho_{j}$, or as
+
+$$\gamma_{j} = \Pr(R_{j} = 1 \mid D_{j} = 1),$$
+
+the probability that a dropout would have responded. The two are in one to one
+correspondence,
+
+$$\gamma_{j} = p_{j} + \rho_{j} \sqrt{\frac{p_{j} (1 - p_{j}) (1 - \omega_{j})}{\omega_{j}}},
+\qquad
+\rho_{j} = (\gamma_{j} - p_{j}) \sqrt{\frac{\omega_{j}}{p_{j} (1 - p_{j}) (1 - \omega_{j})}}.$$
+
+```{r gamma-conversion}
+rho_to_gamma(p = 0.45, omega = 0.10, rho = 0)
+rho_to_gamma(p = 0.45, omega = 0.10, rho = c(-0.2, 0.2))
+gamma_to_rho(p = 0.45, omega = 0.10, gamma = 0.60)
+```
+
+Independence gives $\gamma_{j} = p_{j}$: dropouts respond at the same rate as
+the group as a whole. The NRI response probability is
+$p_{j,\mathrm{NRI}} = p_{j} - \gamma_{j} \omega_{j}$, so $\gamma_{j}$ is exactly
+the fraction of dropouts that non-responder imputation misclassifies, and
+
+$$\delta_{\mathrm{NRI}} = (p_{1} - \gamma_{1} \omega_{1}) - (p_{2} - \gamma_{2} \omega_{2}).$$
+
+Because the four joint probabilities must be non-negative, neither parameter is
+free over its whole nominal range. On the $\gamma$ scale the restriction is
+plain arithmetic,
+
+$$\max \left\{ 0, \frac{p_{j} + \omega_{j} - 1}{\omega_{j}} \right\}
+\leq \gamma_{j} \leq
+\min \left\{ 1, \frac{p_{j}}{\omega_{j}} \right\},$$
+
+which is the requirement that the four joint probabilities be non-negative, and
+it maps onto the Frechet-Prentice bounds on the correlation.
+
+```{r gamma-bounds}
+gamma_bounds(p = 0.45, omega = 0.10)
+rho_bounds(p = 0.45, omega = 0.10)
+```
+
+The bounds are 0 and 1 here, and they usually are: $\gamma_{j}$ is an ordinary
+conditional probability and the restriction binds only once the dropout
+probability exceeds $p_{j}$ or $1 - p_{j}$. What is worth looking at is the
+exchange rate between the two scales.
+
+```{r gamma-bounds-plot}
+plot(gamma_bounds(p = 0.45, omega = 0.10))
+```
+
+Each segment spans the attainable correlations at one dropout probability, and
+all four span the whole unit interval in $\gamma_{j}$. The slope is what
+differs. At $\omega_{j} = 0.05$ a correlation of $0.25$ already means that every
+dropout would have responded, while at $\omega_{j} = 0.30$ the same statement
+needs a correlation of about $0.72$. An assumption that reads as mild on the
+correlation scale can be a strong claim about what the dropouts would have done,
+which is the reason to elicit it on the $\gamma$ scale.
+
+## A worked design
+
+The phase 3 cytisine trial of Dogar et al. (2020) planned for abstinence
+probabilities of 0.47 and 0.41, a dropout probability of 0.10, equal
+allocation, a one-sided 0.025 level and 80 percent power, and analysed the
+primary endpoint under NRI. The simple inflation method gives the sample size
+the trial enrolled.
+
+```{r design-cc}
+p1 <- 0.47
+p2 <- 0.41
+omega <- 0.10
+
+cc <- sample_size_cc(p1 = p1, p2 = p2, omega1 = omega, omega2 = omega,
+                     r = 1, alpha = 0.025, target_power = 0.8)
+cc$n_total_adjust
+```
+
+The NRI formula needs the association parameter as well. The correlation is not
+free, so a natural sensitivity range runs from the lowest to the highest value
+both groups admit.
+
+```{r design-nri}
+b1 <- rho_bounds(p = p1, omega = omega)
+b2 <- rho_bounds(p = p2, omega = omega)
+rho_range <- c(L = max(b1$rho_lower, b2$rho_lower),
+               "0" = 0,
+               U = min(b1$rho_upper, b2$rho_upper))
+
+design <- do.call(rbind, lapply(names(rho_range), function(nm) {
+  rho <- rho_range[[nm]]
+  ss <- sample_size_nri(p1 = p1, p2 = p2, omega1 = omega, omega2 = omega,
+                        rho1 = rho, rho2 = rho,
+                        r = 1, alpha = 0.025, target_power = 0.8)
+  data.frame(
+    rho_label = nm,
+    rho = rho,
+    gamma1 = rho_to_gamma(p = p1, omega = omega, rho = rho),
+    gamma2 = rho_to_gamma(p = p2, omega = omega, rho = rho),
+    delta_NRI = ss$effect_NRI,
+    N_CC = cc$n_total_adjust,
+    N_NRI = ss$n_total,
+    RE = cc$n_total_adjust / ss$n_total
+  )
+}))
+design
+```
+
+The $\gamma$ columns say what the two extremes of the correlation mean. At the
+lower bound no dropout in the control group would have responded; at the upper
+bound every dropout in the treatment group would have. The full-data effect is
+0.06 throughout, while the effect an NRI analysis is powered against is smaller,
+and the sample size the simple inflation method gives falls short of the sample
+size NRI needs at every value of the correlation considered here.
+
+The `plot()` method sweeps the same comparison across the feasible range rather
+than at three points.
+
+```{r design-plot}
+ss <- sample_size_nri(p1 = p1, p2 = p2, omega1 = omega, omega2 = omega,
+                      rho1 = 0, rho2 = 0, r = 1, alpha = 0.025,
+                      target_power = 0.8)
+plot(ss, vary = "rho")
+```
+
+## Exact operating characteristics
+
+Nothing above is checked by simulation. `power_nri()` and `power_cc()`
+enumerate the joint distribution of the observed outcomes, so the power and the
+type I error rate they return are exact up to floating point.
+
+```{r exact-power}
+planned <- power_nri(n1 = 1194, n2 = 1194, p1 = p1, p2 = p2,
+                     omega1 = omega, omega2 = omega, alpha = 0.025)
+required <- power_nri(n1 = 1287, n2 = 1287, p1 = p1, p2 = p2,
+                      omega1 = omega, omega2 = omega, alpha = 0.025)
+c(planned = planned$power, required = required$power)
+```
+
+A design built by inflating a dropout-free sample size therefore attains about
+77 percent power against the effect it was designed to detect, not the 80
+percent intended.
+
+`power_cc()` does the same for a complete case analysis. A direct enumeration
+over completer counts and responder counts is $O(N^{4})$; `power_cc()` uses the
+fact that the pooled-variance $Z$ statistic increases in the group 1 responder
+count wherever it is positive, so the rejection region is an upper set and the
+inner double sum collapses to a binomial tail probability at one threshold per
+control-group count. That is a regrouping of the same finite sum, so the
+returned values remain exact.
+
+```{r exact-power-cc}
+power_cc(n1 = 60, n2 = 60, p1 = 0.6, p2 = 0.4,
+         omega1 = 0.15, omega2 = 0.15, alpha = 0.025)
+```
+
+## What a historical rate does not tell you
+
+Design parameters usually come from a published trial, and a published rate is
+the output of an analysis rule rather than a statement about what the dropouts'
+outcomes were. The 0.41 above came from an earlier trial that counted every
+patient without verified abstinence as a non-abstainer. That rate is
+$\Pr(R = 1, D = 0)$, not $\Pr(R = 1)$, so the latent probability is identified
+only within an interval.
+
+```{r latent-bounds}
+lb <- latent_bounds(p_obs = 0.41, N_randomized = 620, N_dropout = 62)
+lb
+```
+
+The interval always has width $\omega$; only its position depends on the rule
+the historical trial applied. Counting dropouts as responders, as a best case
+analysis does in the treatment group, shifts it down by $\omega$; a complete
+case rate is first placed back onto the same scale.
+
+```{r latent-bounds-rules}
+rules <- expand.grid(method = c("nri", "cc", "bc", "wc"),
+                     group = c("treatment", "control"),
+                     stringsAsFactors = FALSE)
+intervals <- do.call(rbind, Map(function(m, g) {
+  b <- latent_bounds(p_obs = 0.41, N_randomized = 620, N_dropout = 62,
+                     method = m, group = g)
+  data.frame(method = m, group = g, p_lower = b$p_lower, p_upper = b$p_upper)
+}, rules$method, rules$group))
+rownames(intervals) <- NULL
+intervals
+```
+
+Each candidate value in the interval implies a different correlation, which
+`infer_rho()` returns. Setting a joint cell to zero, as is sometimes done to
+read a latent probability off a best or worst case rate, selects one endpoint of
+the interval rather than identifying a point.
+
+```{r infer-rho}
+for (p in c(lb$p_lower, lb$p_midpoint, lb$p_upper)) {
+  cat(sprintf("p = %.3f  ->  rho = %+.4f\n", p,
+              infer_rho(p_obs = 0.41, omega = lb$omega, p = p)$rho))
+}
+```
+
+Planning should carry the interval rather than a single recovered value.
+
+## Reproducing the article
+
+`inst/scripts/` regenerates the figures and tables of the main text and
+`inst/sup_info/` those of the supplementary material. Each is split into a
+computation stage that writes intermediate results to `data/*.rds` and a
+rendering stage that reads those files and writes `results/*.eps`,
+`results/*.pdf` and `results/*.tex`. `inst/scripts/number_check.R` re-extracts
+every numerical value quoted in the article from the regenerated `.rds` files,
+so that a number transcribed into the manuscript can be checked against its
+source.
+
+## Reference
+
+Dogar O, Keding A, Gabe R, et al. Cytisine for smoking cessation in patients
+with tuberculosis: a multicentre, randomised, double-blind, placebo-controlled
+phase 3 trial. *Lancet Global Health* 2020; 8: e1408-e1417.

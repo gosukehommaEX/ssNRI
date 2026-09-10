@@ -1,0 +1,30 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Exact type I error rate as a function of the common response probability assumed under the null hypothesis, at $n_{1} = n_{2} = 192$ with $p_{1} = 0.45$, $p_{2} = 0.30$, $\omega_{1} = \omega_{2} = 0.10$, $\rho_{1} = \rho_{2} = 0$ and $\alpha = 0.025$ (one-sided). The size of a two-sample binomial test is not constant in this nuisance parameter, so no single value establishes size control.}
+  \label{tab:null-prevalence}
+  \begin{threeparttable}
+  \begin{tabular}{llr}
+    \toprule
+    Analysis & Assumed null probability & Type I error rate \\
+    \midrule
+    NRI & 0.1000 & 0.0252 \\
+     & 0.2000 & 0.0249 \\
+     & 0.2700 & 0.0248 \\
+     & 0.3000 & 0.0251 \\
+     & 0.3375 (weighted average) & 0.0248 \\
+     & 0.4050 & 0.0260 \\
+     & 0.5000 & 0.0232 \\
+    \addlinespace
+    CC & 0.1000 & 0.0250 \\
+     & 0.2000 & 0.0252 \\
+     & 0.3000 & 0.0251 \\
+     & 0.3750 (weighted average) & 0.0251 \\
+     & 0.4500 & 0.0251 \\
+     & 0.5000 & 0.0251 \\
+    \bottomrule
+  \end{tabular}
+  \begin{tablenotes}[flushleft]\footnotesize
+    \item The sample size is the one the NRI formula gives under these assumptions. For the NRI analysis the assumed probability is on the NRI scale; for the complete case analysis it is the conditional response probability among completers. The row marked as the weighted average is the convention used in the main text.
+  \end{tablenotes}
+  \end{threeparttable}
+\end{table}

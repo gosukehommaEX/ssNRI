@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Exact power of a complete case analysis when the two dropout probabilities differ and each group is inflated by its own dropout probability. Design parameters: $p_{1} = 0.45$, $p_{2} = 0.30$, $\rho_{1} = \rho_{2} = 0$, $r = 1$, $\alpha = 0.025$ (one-sided) and target power $= 0.8$. The target power is attained throughout, so equal dropout probabilities are not necessary for the simple inflation method to be valid.}
+  \label{tab:unequal-dropout}
+  \begin{threeparttable}
+  \begin{tabular}{ccrrrrr}
+    \toprule
+    $\omega_{1}$ & $\omega_{2}$ & $n_{\mathrm{complete}}$ & $n_{1}$ & $n_{2}$ & Power & Type I error \\
+    \midrule
+    0.10 & 0.10 & 163 & 182 & 182 & 0.8048 & 0.0251 \\
+    0.05 & 0.20 & 163 & 172 & 204 & 0.8035 & 0.0253 \\
+    0.20 & 0.05 & 163 & 204 & 172 & 0.8035 & 0.0250 \\
+    0.02 & 0.35 & 163 & 167 & 251 & 0.8036 & 0.0255 \\
+    0.35 & 0.02 & 163 & 251 & 167 & 0.8036 & 0.0248 \\
+    0.40 & 0.05 & 163 & 272 & 172 & 0.8033 & 0.0248 \\
+    \bottomrule
+  \end{tabular}
+  \begin{tablenotes}[flushleft]\footnotesize
+    \item $n_{\mathrm{complete}}$ is the number of completers per group the unadjusted formula requires, and $n_{j} = \lceil n_{\mathrm{complete}} / (1 - \omega_{j}) \rceil$ is the number randomized to group $j$. Power and type I error rate are exact, computed by complete enumeration over the numbers of completers and responders rather than by simulation.
+  \end{tablenotes}
+  \end{threeparttable}
+\end{table}

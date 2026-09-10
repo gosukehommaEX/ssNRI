@@ -1,18 +1,42 @@
 Package: ssNRI
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Sample Size Calculation for Trials with Non-Responder Imputation
 Version: 0.1.0
-Authors@R: c(
-    person(
-      "Jane", "Doe",
-      email = "jane@example.com",
-      role = c("aut", "cre")
-    )
+Authors@R: person(
+    given  = "Gosuke",
+    family = "Homma",
+    role   = c("aut", "cre"),
+    email  = "my.name.is.gosuke@gmail.com"
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
+Description: Sample size and operating characteristics for two-group superiority
+    trials with a binary endpoint in which dropouts are handled by non-responder
+    imputation (NRI). Latent response and dropout indicators are modelled jointly
+    as a bivariate Bernoulli distribution, so that the association between
+    response and dropout, the group-specific dropout probabilities, and the
+    allocation ratio can all be specified directly. Provides closed-form sample
+    size formulas for the dropout-free design, for a complete case analysis under
+    the simple inflation method, and for NRI, together with exact power and exact
+    type I error rate obtained by complete enumeration of the joint outcome
+    distribution.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
+Depends:
+    R (>= 3.5.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
+Imports:
+    ggplot2 (>= 3.4.0),
+    rlang,
+    stats
+Suggests:
+    dplyr,
+    ggh4x,
+    knitr,
+    metR,
+    rmarkdown,
+    testthat (>= 3.1.5),
+    tidyr
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+URL: https://github.com/gosukehommaEX/ssNRI
+BugReports: https://github.com/gosukehommaEX/ssNRI/issues
