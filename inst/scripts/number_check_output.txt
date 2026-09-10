@@ -1,6 +1,6 @@
 ==================================================================
  ssNRI: numbers quoted in the manuscript, re-extracted from .rds
- generated 2026-09-10 23:31:57
+ generated 2026-09-11 07:42:50
 ==================================================================
 
 ################ Section 3.1 / Figure 1 ################
@@ -165,12 +165,12 @@ design: n1 = n2 = 192, p1 = 0.45, p2 = 0.3, omega = 0.1, alpha = 0.025
 
 ################ Table S4 (unequal dropout counterexample) ################
 design: p1 = 0.45, p2 = 0.3, rho1 = rho2 = 0, alpha = 0.025, target power = 0.8
-  omega = (0.10, 0.10): n = (182, 182), power = 0.8048, type I error = 0.0251
-  omega = (0.05, 0.20): n = (172, 204), power = 0.8035, type I error = 0.0253
-  omega = (0.20, 0.05): n = (204, 172), power = 0.8035, type I error = 0.0250
-  omega = (0.02, 0.35): n = (167, 251), power = 0.8036, type I error = 0.0255
-  omega = (0.35, 0.02): n = (251, 167), power = 0.8036, type I error = 0.0248
-  omega = (0.40, 0.05): n = (272, 172), power = 0.8033, type I error = 0.0248
+  omega = (0.10, 0.10): n_complete = 163, n = (182, 182), power = 0.8048, type I error = 0.0251
+  omega = (0.05, 0.20): n_complete = 163, n = (172, 204), power = 0.8035, type I error = 0.0253
+  omega = (0.20, 0.05): n_complete = 163, n = (204, 172), power = 0.8035, type I error = 0.0250
+  omega = (0.02, 0.35): n_complete = 163, n = (167, 251), power = 0.8036, type I error = 0.0255
+  omega = (0.35, 0.02): n_complete = 163, n = (251, 167), power = 0.8036, type I error = 0.0248
+  omega = (0.40, 0.05): n_complete = 163, n = (272, 172), power = 0.8033, type I error = 0.0248
 exact power across the counterexamples: [0.8033, 0.8048]
   -> the target power 0.8 is attained however unequal the two dropout probabilities are,
      so equal dropout probabilities are sufficient but not necessary

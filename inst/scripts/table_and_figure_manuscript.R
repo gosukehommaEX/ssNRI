@@ -387,9 +387,14 @@ rho_cell <- function(label, value) {
   }
 }
 
+# Measured against the manuscript class (article, 12pt, a4paper: textwidth
+# 390.0pt): at the default column separation this table is 389.5pt wide, which
+# fits by half a point and would overflow on any later edit. At 4pt separation
+# it is 353.5pt, so it stays at the body font size with room to spare.
 tab2_lines <- c(
   "\\begin{table}[htbp]",
   "  \\centering",
+  "  \\setlength{\\tabcolsep}{4pt}",
   paste0(
     "  \\caption{Required sample sizes for the cytisine trial under the design ",
     "assumptions of the original trial: $p_{1} = ",

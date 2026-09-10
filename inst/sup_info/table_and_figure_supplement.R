@@ -458,10 +458,16 @@ rho_cell <- function(label, value) {
   }
 }
 
+# Twelve columns. Measured against the manuscript class (article, 12pt,
+# a4paper: textwidth 390.0pt): 440.6pt at footnotesize with the default column
+# separation, which overflows, and still 397.9pt at scriptsize. At 3pt
+# separation it is 368.6pt, so every column is kept at footnotesize without
+# turning the page landscape.
 tabS1 <- c(
   "\\begin{table}[htbp]",
   "  \\centering",
   "  \\footnotesize",
+  "  \\setlength{\\tabcolsep}{3pt}",
   paste0(
     "  \\caption{Required sample sizes and relative efficiency for the ",
     "cytisine trial across a range of assumed response and dropout ",

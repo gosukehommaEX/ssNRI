@@ -364,7 +364,8 @@ emit("design: p1 = ", ts4$p1, ", p2 = ", ts4$p2,
      ", target power = ", ts4$target_power)
 for (k in seq_len(nrow(dt4))) {
   emit("  omega = (", r2(dt4$omega1[k]), ", ", r2(dt4$omega2[k]), "): ",
-       "n = (", int(dt4$n1[k]), ", ", int(dt4$n2[k]), "), ",
+       "n_complete = ", int(dt4$n_complete[k]),
+       ", n = (", int(dt4$n1[k]), ", ", int(dt4$n2[k]), "), ",
        "power = ", r4(dt4$power[k]),
        ", type I error = ", r4(dt4$type1_error[k]))
 }
