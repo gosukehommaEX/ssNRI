@@ -5,35 +5,35 @@
 \title{Sample Size for a Trial Analyzed under Non-Responder Imputation}
 \usage{
 sample_size_nri(
-  p1,
-  p2,
+  pi1,
+  pi0,
   omega1 = 0,
-  omega2 = 0,
+  omega0 = 0,
   rho1 = 0,
-  rho2 = 0,
+  rho0 = 0,
   r = 1,
   alpha = 0.025,
   target_power = 0.8
 )
 }
 \arguments{
-\item{p1}{Numeric. Latent response probability for group 1, 0 < p1 < 1.}
+\item{pi1}{Numeric. Latent response probability for group 1, 0 < pi1 < 1.}
 
-\item{p2}{Numeric. Latent response probability for group 2, 0 < p2 < 1.}
+\item{pi0}{Numeric. Latent response probability for group 0, 0 < pi0 < 1.}
 
 \item{omega1}{Numeric. Dropout probability for group 1, 0 <= omega1 < 1
 (default = 0).}
 
-\item{omega2}{Numeric. Dropout probability for group 2, 0 <= omega2 < 1
+\item{omega0}{Numeric. Dropout probability for group 0, 0 <= omega0 < 1
 (default = 0).}
 
 \item{rho1}{Numeric. Correlation between the latent response and the dropout
 indicator in group 1 (default = 0).}
 
-\item{rho2}{Numeric. Correlation between the latent response and the dropout
-indicator in group 2 (default = 0).}
+\item{rho0}{Numeric. Correlation between the latent response and the dropout
+indicator in group 0 (default = 0).}
 
-\item{r}{Numeric. Allocation ratio n1 / n2, r > 0 (default = 1).}
+\item{r}{Numeric. Allocation ratio n1 / n0, r > 0 (default = 1).}
 
 \item{alpha}{Numeric. One-sided significance level (default = 0.025).}
 
@@ -41,8 +41,8 @@ indicator in group 2 (default = 0).}
 }
 \value{
 A \code{data.frame} of class \code{sample_size_nri} with one row
-containing the inputs together with \code{p1_NRI}, \code{p2_NRI},
-\code{effect_latent}, \code{effect_NRI}, \code{n1}, \code{n2} and
+containing the inputs together with \code{pi1_NRI}, \code{pi0_NRI},
+\code{effect_full}, \code{effect_NRI}, \code{n1}, \code{n0} and
 \code{n_total}.
 }
 \description{
@@ -55,9 +55,9 @@ carried out on the NRI scale, which is the scale the analysis actually tests.
 The response probability seen by an NRI analysis is the joint probability of
 responding and completing,
 
-pj_NRI = pj (1 - omegaj) - rhoj sqrt(pj (1 - pj) omegaj (1 - omegaj)),
+pi_j_NRI = pi_j (1 - omega_j) - rho_j sqrt(pi_j (1 - pi_j) omega_j (1 - omega_j)),
 
-and the effect the trial is powered against is delta_NRI = p1_NRI - p2_NRI.
+and the effect the trial is powered against is delta_NRI = pi1_NRI - pi0_NRI.
 Under a common dropout probability and within-group independence this is
 (1 - omega) times the complete case effect, so the simple inflation method,
 which powers against the larger complete case effect, falls short. Unequal
@@ -69,10 +69,10 @@ of patients to randomize, because dropouts remain in the analysis as
 non-responders rather than being removed from it.
 }
 \examples{
-sample_size_nri(p1 = 0.6, p2 = 0.4, omega1 = 0.2, omega2 = 0.2)
+sample_size_nri(pi1 = 0.6, pi0 = 0.4, omega1 = 0.2, omega0 = 0.2)
 
 # Compare with the simple inflation method under the same assumptions
-sample_size_cc(p1 = 0.6, p2 = 0.4, omega1 = 0.2, omega2 = 0.2)$n_total_adjust
+sample_size_cc(pi1 = 0.6, pi0 = 0.4, omega1 = 0.2, omega0 = 0.2)$n_total_adjust
 
 }
 \seealso{

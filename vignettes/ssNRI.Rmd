@@ -23,12 +23,13 @@ complete case analysis compares the response probabilities among those who
 complete. Non-responder imputation counts a dropout as a non-responder and
 compares
 
-$$p_{j,\mathrm{NRI}} = \Pr(R_{j} = 1, D_{j} = 0),$$
+$$\pi_{j,\mathrm{NRI}} = \Pr(R_{ij} = 1, D_{ij} = 0),$$
 
-where $R_{j}$ is the latent response indicator and $D_{j}$ the dropout
-indicator in group $j$. These are different quantities, and the difference is
-not a nuisance: the effect that an NRI analysis is powered to detect,
-$\delta_{\mathrm{NRI}} = p_{1,\mathrm{NRI}} - p_{2,\mathrm{NRI}}$, is not the
+where $R_{ij}$ is the latent response indicator and $D_{ij}$ the dropout
+indicator for patient $i$ in group $j$. These are different quantities, and
+the difference is not a nuisance: the effect that an NRI analysis is powered
+to detect,
+$\delta_{\mathrm{NRI}} = \pi_{1,\mathrm{NRI}} - \pi_{0,\mathrm{NRI}}$, is not the
 effect a complete case analysis is powered to detect.
 
 The usual practice is to compute a sample size for a trial without dropout and
@@ -37,61 +38,61 @@ completers, which is what a complete case analysis needs. It does nothing about
 the change of estimand that NRI brings, so it is not the right adjustment when
 NRI is planned.
 
-`ssNRI` models $R_{j}$ and $D_{j}$ jointly as a bivariate Bernoulli distribution,
-which makes both estimands explicit and gives a closed-form sample size for
-each.
+`ssNRI` models $R_{ij}$ and $D_{ij}$ jointly as a bivariate Bernoulli
+distribution, which makes both estimands explicit and gives a closed-form
+sample size for each.
 
 ## Two ways to state the same assumption
 
 The joint distribution needs one more parameter than the two marginal
-probabilities $p_{j}$ and $\omega_{j}$. It can be given as a correlation
+probabilities $\pi_{j}$ and $\omega_{j}$. It can be given as a correlation
 $\rho_{j}$, or as
 
-$$\gamma_{j} = \Pr(R_{j} = 1 \mid D_{j} = 1),$$
+$$\gamma_{j} = \Pr(R_{ij} = 1 \mid D_{ij} = 1),$$
 
 the probability that a dropout would have responded. The two are in one to one
 correspondence,
 
-$$\gamma_{j} = p_{j} + \rho_{j} \sqrt{\frac{p_{j} (1 - p_{j}) (1 - \omega_{j})}{\omega_{j}}},
+$$\gamma_{j} = \pi_{j} + \rho_{j} \sqrt{\frac{\pi_{j} (1 - \pi_{j}) (1 - \omega_{j})}{\omega_{j}}},
 \qquad
-\rho_{j} = (\gamma_{j} - p_{j}) \sqrt{\frac{\omega_{j}}{p_{j} (1 - p_{j}) (1 - \omega_{j})}}.$$
+\rho_{j} = (\gamma_{j} - \pi_{j}) \sqrt{\frac{\omega_{j}}{\pi_{j} (1 - \pi_{j}) (1 - \omega_{j})}}.$$
 
 ```{r gamma-conversion}
-rho_to_gamma(p = 0.45, omega = 0.10, rho = 0)
-rho_to_gamma(p = 0.45, omega = 0.10, rho = c(-0.2, 0.2))
-gamma_to_rho(p = 0.45, omega = 0.10, gamma = 0.60)
+rho_to_gamma(pi = 0.45, omega = 0.10, rho = 0)
+rho_to_gamma(pi = 0.45, omega = 0.10, rho = c(-0.2, 0.2))
+gamma_to_rho(pi = 0.45, omega = 0.10, gamma = 0.60)
 ```
 
-Independence gives $\gamma_{j} = p_{j}$: dropouts respond at the same rate as
+Independence gives $\gamma_{j} = \pi_{j}$: dropouts respond at the same rate as
 the group as a whole. The NRI response probability is
-$p_{j,\mathrm{NRI}} = p_{j} - \gamma_{j} \omega_{j}$, so $\gamma_{j}$ is exactly
+$\pi_{j,\mathrm{NRI}} = \pi_{j} - \gamma_{j} \omega_{j}$, so $\gamma_{j}$ is exactly
 the fraction of dropouts that non-responder imputation misclassifies, and
 
-$$\delta_{\mathrm{NRI}} = (p_{1} - \gamma_{1} \omega_{1}) - (p_{2} - \gamma_{2} \omega_{2}).$$
+$$\delta_{\mathrm{NRI}} = (\pi_{1} - \gamma_{1} \omega_{1}) - (\pi_{0} - \gamma_{0} \omega_{0}).$$
 
 Because the four joint probabilities must be non-negative, neither parameter is
 free over its whole nominal range. On the $\gamma$ scale the restriction is
 plain arithmetic,
 
-$$\max \left\{ 0, \frac{p_{j} + \omega_{j} - 1}{\omega_{j}} \right\}
+$$\max \left\{ 0, \frac{\pi_{j} + \omega_{j} - 1}{\omega_{j}} \right\}
 \leq \gamma_{j} \leq
-\min \left\{ 1, \frac{p_{j}}{\omega_{j}} \right\},$$
+\min \left\{ 1, \frac{\pi_{j}}{\omega_{j}} \right\},$$
 
 which is the requirement that the four joint probabilities be non-negative, and
 it maps onto the Frechet-Prentice bounds on the correlation.
 
 ```{r gamma-bounds}
-gamma_bounds(p = 0.45, omega = 0.10)
-rho_bounds(p = 0.45, omega = 0.10)
+gamma_bounds(pi = 0.45, omega = 0.10)
+rho_bounds(pi = 0.45, omega = 0.10)
 ```
 
 The bounds are 0 and 1 here, and they usually are: $\gamma_{j}$ is an ordinary
 conditional probability and the restriction binds only once the dropout
-probability exceeds $p_{j}$ or $1 - p_{j}$. What is worth looking at is the
+probability exceeds $\pi_{j}$ or $1 - \pi_{j}$. What is worth looking at is the
 exchange rate between the two scales.
 
 ```{r gamma-bounds-plot}
-plot(gamma_bounds(p = 0.45, omega = 0.10))
+plot(gamma_bounds(pi = 0.45, omega = 0.10))
 ```
 
 Each segment spans the attainable correlations at one dropout probability, and
@@ -111,11 +112,11 @@ primary endpoint under NRI. The simple inflation method gives the sample size
 the trial enrolled.
 
 ```{r design-cc}
-p1 <- 0.47
-p2 <- 0.41
+pi1 <- 0.47
+pi0 <- 0.41
 omega <- 0.10
 
-cc <- sample_size_cc(p1 = p1, p2 = p2, omega1 = omega, omega2 = omega,
+cc <- sample_size_cc(pi1 = pi1, pi0 = pi0, omega1 = omega, omega0 = omega,
                      r = 1, alpha = 0.025, target_power = 0.8)
 cc$n_total_adjust
 ```
@@ -125,22 +126,22 @@ free, so a natural sensitivity range runs from the lowest to the highest value
 both groups admit.
 
 ```{r design-nri}
-b1 <- rho_bounds(p = p1, omega = omega)
-b2 <- rho_bounds(p = p2, omega = omega)
-rho_range <- c(L = max(b1$rho_lower, b2$rho_lower),
+b1 <- rho_bounds(pi = pi1, omega = omega)
+b0 <- rho_bounds(pi = pi0, omega = omega)
+rho_range <- c(L = max(b1$rho_lower, b0$rho_lower),
                "0" = 0,
-               U = min(b1$rho_upper, b2$rho_upper))
+               U = min(b1$rho_upper, b0$rho_upper))
 
 design <- do.call(rbind, lapply(names(rho_range), function(nm) {
   rho <- rho_range[[nm]]
-  ss <- sample_size_nri(p1 = p1, p2 = p2, omega1 = omega, omega2 = omega,
-                        rho1 = rho, rho2 = rho,
+  ss <- sample_size_nri(pi1 = pi1, pi0 = pi0, omega1 = omega, omega0 = omega,
+                        rho1 = rho, rho0 = rho,
                         r = 1, alpha = 0.025, target_power = 0.8)
   data.frame(
     rho_label = nm,
     rho = rho,
-    gamma1 = rho_to_gamma(p = p1, omega = omega, rho = rho),
-    gamma2 = rho_to_gamma(p = p2, omega = omega, rho = rho),
+    gamma1 = rho_to_gamma(pi = pi1, omega = omega, rho = rho),
+    gamma0 = rho_to_gamma(pi = pi0, omega = omega, rho = rho),
     delta_NRI = ss$effect_NRI,
     N_CC = cc$n_total_adjust,
     N_NRI = ss$n_total,
@@ -161,8 +162,8 @@ The `plot()` method sweeps the same comparison across the feasible range rather
 than at three points.
 
 ```{r design-plot}
-ss <- sample_size_nri(p1 = p1, p2 = p2, omega1 = omega, omega2 = omega,
-                      rho1 = 0, rho2 = 0, r = 1, alpha = 0.025,
+ss <- sample_size_nri(pi1 = pi1, pi0 = pi0, omega1 = omega, omega0 = omega,
+                      rho1 = 0, rho0 = 0, r = 1, alpha = 0.025,
                       target_power = 0.8)
 plot(ss, vary = "rho")
 ```
@@ -174,10 +175,10 @@ enumerate the joint distribution of the observed outcomes, so the power and the
 type I error rate they return are exact up to floating point.
 
 ```{r exact-power}
-planned <- power_nri(n1 = 1194, n2 = 1194, p1 = p1, p2 = p2,
-                     omega1 = omega, omega2 = omega, alpha = 0.025)
-required <- power_nri(n1 = 1287, n2 = 1287, p1 = p1, p2 = p2,
-                      omega1 = omega, omega2 = omega, alpha = 0.025)
+planned <- power_nri(n1 = 1194, n0 = 1194, pi1 = pi1, pi0 = pi0,
+                     omega1 = omega, omega0 = omega, alpha = 0.025)
+required <- power_nri(n1 = 1287, n0 = 1287, pi1 = pi1, pi0 = pi0,
+                      omega1 = omega, omega0 = omega, alpha = 0.025)
 c(planned = planned$power, required = required$power)
 ```
 
@@ -194,8 +195,8 @@ control-group count. That is a regrouping of the same finite sum, so the
 returned values remain exact.
 
 ```{r exact-power-cc}
-power_cc(n1 = 60, n2 = 60, p1 = 0.6, p2 = 0.4,
-         omega1 = 0.15, omega2 = 0.15, alpha = 0.025)
+power_cc(n1 = 60, n0 = 60, pi1 = 0.6, pi0 = 0.4,
+         omega1 = 0.15, omega0 = 0.15, alpha = 0.025)
 ```
 
 ## What a historical rate does not tell you
@@ -204,11 +205,11 @@ Design parameters usually come from a published trial, and a published rate is
 the output of an analysis rule rather than a statement about what the dropouts'
 outcomes were. The 0.41 above came from an earlier trial that counted every
 patient without verified abstinence as a non-abstainer. That rate is
-$\Pr(R = 1, D = 0)$, not $\Pr(R = 1)$, so the latent probability is identified
+$\Pr(R_{ij} = 1, D_{ij} = 0)$, not $\Pr(R_{ij} = 1)$, so the latent probability is identified
 only within an interval.
 
 ```{r latent-bounds}
-lb <- latent_bounds(p_obs = 0.41, N_randomized = 620, N_dropout = 62)
+lb <- latent_bounds(pi_obs = 0.41, N_randomized = 620, N_dropout = 62)
 lb
 ```
 
@@ -222,9 +223,9 @@ rules <- expand.grid(method = c("nri", "cc", "bc", "wc"),
                      group = c("treatment", "control"),
                      stringsAsFactors = FALSE)
 intervals <- do.call(rbind, Map(function(m, g) {
-  b <- latent_bounds(p_obs = 0.41, N_randomized = 620, N_dropout = 62,
+  b <- latent_bounds(pi_obs = 0.41, N_randomized = 620, N_dropout = 62,
                      method = m, group = g)
-  data.frame(method = m, group = g, p_lower = b$p_lower, p_upper = b$p_upper)
+  data.frame(method = m, group = g, pi_lower = b$pi_lower, pi_upper = b$pi_upper)
 }, rules$method, rules$group))
 rownames(intervals) <- NULL
 intervals
@@ -236,9 +237,9 @@ read a latent probability off a best or worst case rate, selects one endpoint of
 the interval rather than identifying a point.
 
 ```{r infer-rho}
-for (p in c(lb$p_lower, lb$p_midpoint, lb$p_upper)) {
-  cat(sprintf("p = %.3f  ->  rho = %+.4f\n", p,
-              infer_rho(p_obs = 0.41, omega = lb$omega, p = p)$rho))
+for (pi in c(lb$pi_lower, lb$pi_midpoint, lb$pi_upper)) {
+  cat(sprintf("pi = %.3f  ->  rho = %+.4f\n", pi,
+              infer_rho(pi_obs = 0.41, omega = lb$omega, pi = pi)$rho))
 }
 ```
 

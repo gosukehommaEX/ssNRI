@@ -6,21 +6,21 @@
 #' interval from -1 to 1; the attainable range follows from the Frechet bounds
 #' and was given for binary variables by Prentice (1988).
 #'
-#' @param p Numeric. Latent response probability, 0 < p < 1.
+#' @param pi Numeric. Latent response probability, 0 < pi < 1.
 #' @param omega Numeric. Dropout probability, 0 <= omega < 1.
 #'
 #' @return A \code{data.frame} of class \code{rho_bounds} with one row containing
-#' \code{p}, \code{omega}, \code{rho_lower} and \code{rho_upper}.
+#' \code{pi}, \code{omega}, \code{rho_lower} and \code{rho_upper}.
 #'
 #' @details
-#' For binary R with P(R = 1) = p and binary D with P(D = 1) = omega, the
+#' For binary R with P(R = 1) = pi and binary D with P(D = 1) = omega, the
 #' correlation is confined to
 #'
-#'   rho_lower = max(-sqrt(p omega / ((1 - p)(1 - omega))),
-#'                   -sqrt((1 - p)(1 - omega) / (p omega)))
+#'   rho_lower = max(-sqrt(pi omega / ((1 - pi)(1 - omega))),
+#'                   -sqrt((1 - pi)(1 - omega) / (pi omega)))
 #'
-#'   rho_upper = min( sqrt(p (1 - omega) / (omega (1 - p))),
-#'                    sqrt(omega (1 - p) / (p (1 - omega))))
+#'   rho_upper = min( sqrt(pi (1 - omega) / (omega (1 - pi))),
+#'                    sqrt(omega (1 - pi) / (pi (1 - omega))))
 #'
 #' When omega = 0 there is no dropout and the correlation is not defined; the
 #' degenerate range from 0 to 0 is returned so that callers can treat this case
@@ -31,15 +31,15 @@
 #' to each binary observation. \emph{Biometrics}, 44, 1033-1048.
 #'
 #' @examples
-#' rho_bounds(p = 0.35, omega = 0.10)
-#' rho_bounds(p = 0.60, omega = 0.25)
+#' rho_bounds(pi = 0.35, omega = 0.10)
+#' rho_bounds(pi = 0.60, omega = 0.25)
 #'
 #' @export
-rho_bounds <- function(p, omega) {
+rho_bounds <- function(pi, omega) {
 
   # Input validation
-  if (p <= 0 || p >= 1) {
-    stop("p must be strictly between 0 and 1")
+  if (pi <= 0 || pi >= 1) {
+    stop("pi must be strictly between 0 and 1")
   }
   if (omega < 0 || omega >= 1) {
     stop("omega must be between 0 (inclusive) and 1 (exclusive)")
@@ -48,7 +48,7 @@ rho_bounds <- function(p, omega) {
   # Special case: no dropout
   if (omega == 0) {
     result <- data.frame(
-      p         = p,
+      pi         = pi,
       omega     = 0,
       rho_lower = 0,
       rho_upper = 0
@@ -58,16 +58,16 @@ rho_bounds <- function(p, omega) {
   }
 
   # Prentice (1988) bounds
-  lower1    <- -sqrt(p * omega / ((1 - p) * (1 - omega)))
-  lower2    <- -sqrt((1 - p) * (1 - omega) / (p * omega))
-  rho_lower <- max(lower1, lower2)
+  lower1    <- -sqrt(pi * omega / ((1 - pi) * (1 - omega)))
+  lower0    <- -sqrt((1 - pi) * (1 - omega) / (pi * omega))
+  rho_lower <- max(lower1, lower0)
 
-  upper1    <- sqrt(p * (1 - omega) / (omega * (1 - p)))
-  upper2    <- sqrt(omega * (1 - p) / (p * (1 - omega)))
-  rho_upper <- min(upper1, upper2)
+  upper1    <- sqrt(pi * (1 - omega) / (omega * (1 - pi)))
+  upper0    <- sqrt(omega * (1 - pi) / (pi * (1 - omega)))
+  rho_upper <- min(upper1, upper0)
 
   result <- data.frame(
-    p         = p,
+    pi         = pi,
     omega     = omega,
     rho_lower = rho_lower,
     rho_upper = rho_upper
@@ -90,12 +90,12 @@ print.rho_bounds <- function(x, ...) {
   cat("Feasible Correlation Bounds (Prentice 1988)\n")
   cat("============================================\n")
   cat("Parameters:\n")
-  cat(sprintf("              p = %.4f\n", x$p))
-  cat(sprintf("          omega = %.4f\n", x$omega))
+  cat(sprintf("           pi = %.4f\n", x$pi))
+  cat(sprintf("        omega = %.4f\n", x$omega))
   cat("Feasible range:\n")
-  cat(sprintf("      rho_lower = %.4f\n", x$rho_lower))
-  cat(sprintf("      rho_upper = %.4f\n", x$rho_upper))
-  cat(sprintf("    range_width = %.4f\n", x$rho_upper - x$rho_lower))
+  cat(sprintf("    rho_lower = %.4f\n", x$rho_lower))
+  cat(sprintf("    rho_upper = %.4f\n", x$rho_upper))
+  cat(sprintf("  range_width = %.4f\n", x$rho_upper - x$rho_lower))
   invisible(x)
 }
 
@@ -115,7 +115,7 @@ print.rho_bounds <- function(x, ...) {
 #' @return A \code{ggplot} object.
 #'
 #' @examples
-#' plot(rho_bounds(p = 0.35, omega = 0.10), n_points = 21)
+#' plot(rho_bounds(pi = 0.35, omega = 0.10), n_points = 21)
 #'
 #' @importFrom rlang .data
 #' @export
@@ -131,7 +131,7 @@ plot.rho_bounds <- function(x, omega_range = c(0.01, 0.50),
 
   grid <- seq(omega_range[1], omega_range[2], length.out = n_points)
   bnd <- vapply(grid, function(g) {
-    b <- rho_bounds(p = x$p, omega = g)
+    b <- rho_bounds(pi = x$pi, omega = g)
     c(b$rho_lower, b$rho_upper)
   }, numeric(2))
 
@@ -149,7 +149,9 @@ plot.rho_bounds <- function(x, omega_range = c(0.01, 0.50),
     ggplot2::geom_hline(yintercept = 0, linetype = "dotted") +
     ggplot2::labs(
       x = expression(omega), y = expression(rho),
-      title = sprintf("Feasible correlation range at p = %.2f", x$p)
+      title = parse(text = sprintf(
+        'paste("Feasible correlation range at ", pi, " = %.2f")', x$pi
+      ))
     ) +
     ggplot2::theme_bw(base_size = 12)
 

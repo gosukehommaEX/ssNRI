@@ -1,11 +1,11 @@
 ==================================================================
  ssNRI: numbers quoted in the manuscript, re-extracted from .rds
- generated 2026-09-11 07:42:50
+ generated 2026-09-11 09:29:01
 ==================================================================
 
 ################ Section 3.1 / Figure 1 ################
 delta values: 0.15, 0.25
-p1 values: 0.35, 0.45, 0.55
+pi1 values: 0.35, 0.45, 0.55
 omega values (6 of them): 0.05, 0.1, 0.15, 0.2, 0.25, 0.3
   -> the text must say 6 values, starting at 0.05
 target power = 0.8, alpha = 0.025, r = 1
@@ -18,7 +18,7 @@ total sample size range: [92, 496]
   delta = 0.25: power [0.8058, 0.8278], type I error [0.0253, 0.0256]
 
 ################ Section 3.2 / Figure 2 ################
-delta = 0.15, p1 values: 0.35, 0.45, 0.55, omega values: 0.05, 0.1, 0.2, rho step = 0.01
+delta = 0.15, pi1 values: 0.35, 0.45, 0.55, omega values: 0.05, 0.1, 0.2, rho step = 0.01
 grid points: 574
 feasible rho range by case and omega:
   Case_A_p1_0.35, omega = 0.05: rho in [-0.115, 0.305] (43 points)
@@ -43,7 +43,7 @@ exact type I error, simple inflation: [0.0234, 0.0263]
 
 ################ Section 3.3 / Figure 3 ################
 delta values: 0.05, 0.1, 0.15, 0.2
-p1 in [0.3, 0.9], omega in [0.05, 0.5]
+pi1 in [0.3, 0.9], omega in [0.05, 0.5]
 grid points: 11224
 relative efficiency range: [0.222, 1.000]
   -> RE is below 1 in 11219 of 11224 grid points, at or above 1 in 5
@@ -53,14 +53,14 @@ relative efficiency range: [0.222, 1.000]
   delta = 0.2: RE [0.330, 1.000]
 
 ################ Section 4 / Table 2 (cytisine) ################
-design assumptions: p1 = 0.47, p2 = 0.41, omega = 0.1, r = 1, alpha = 0.025, target power = 0.8
-delta_Trad = 0.06
+design assumptions: pi1 = 0.47, pi0 = 0.41, omega = 0.1, r = 1, alpha = 0.025, target power = 0.8
+delta_Full = 0.06
 N_CC (simple inflation)      = 2,388   [reported by Dogar et al.: 2,388]
   match: TRUE
 N_CC per group = 1,194
-rho = L (-0.278): gamma1 = 0.054, gamma2 = 0.000, p1_NRI = 0.4646, p2_NRI = 0.4100, delta_NRI = 0.0546, N_NRI = 2,590, RE = 0.92
-rho = 0 (0.000): gamma1 = 0.470, gamma2 = 0.410, p1_NRI = 0.4230, p2_NRI = 0.3690, delta_NRI = 0.0540, N_NRI = 2,574, RE = 0.93
-rho = U (0.354): gamma1 = 1.000, gamma2 = 0.932, p1_NRI = 0.3700, p2_NRI = 0.3168, delta_NRI = 0.0532, N_NRI = 2,498, RE = 0.96
+rho = L (-0.278): gamma1 = 0.054, gamma0 = 0.000, pi1_NRI = 0.4646, pi0_NRI = 0.4100, delta_NRI = 0.0546, N_NRI = 2,590, RE = 0.92
+rho = 0 (0.000): gamma1 = 0.470, gamma0 = 0.410, pi1_NRI = 0.4230, pi0_NRI = 0.3690, delta_NRI = 0.0540, N_NRI = 2,574, RE = 0.93
+rho = U (0.354): gamma1 = 1.000, gamma0 = 0.932, pi1_NRI = 0.3700, pi0_NRI = 0.3168, delta_NRI = 0.0532, N_NRI = 2,498, RE = 0.96
 shortfall at rho = 0: 186 patients, i.e. 7.226 percent
 
 ################ Section 4 / trial results (AE-M5) ################
@@ -87,53 +87,53 @@ N_CC range:  [2,184, 2,564]
 N_NRI range: [2,234, 2,994]
 RE range:    [0.856, 0.991]
   -> RE is below 1 in all 27 of 27 rows: TRUE
-delta_NRI range: [0.0486, 0.0575]  (delta_Trad = 0.06 throughout: TRUE)
-cross-check against main-text Table 2 (p1 = 0.47, omega = 0.10):
+delta_NRI range: [0.0486, 0.0575]  (delta_Full = 0.06 throughout: TRUE)
+cross-check against main-text Table 2 (pi1 = 0.47, omega = 0.10):
   rho = L: N_NRI = 2,590, RE = 0.92
   rho = 0: N_NRI = 2,574, RE = 0.93
   rho = U: N_NRI = 2,498, RE = 0.96
 
 ################ Figure S1 (unequal dropout, alternative) ################
-p1 = 0.45, p2 = 0.3, rho = 0
-omega1 values: 0.05, 0.1, 0.2; omega2 in [0.02, 0.35]
-delta_NRI range: [0.0660, 0.2325] (delta_Trad = 0.15)
+pi1 = 0.45, pi0 = 0.3, rho = 0
+omega1 values: 0.05, 0.1, 0.2; omega0 in [0.02, 0.35]
+delta_NRI range: [0.0660, 0.2325] (delta_Full = 0.15)
 N under the NRI formula:      [124, 1,584]
 N under the simple inflation: [339, 455]
 exact power, simple inflation: [0.2673, 0.9993]
-  worst case: omega1 = 0.2, omega2 = 0.02 -> power 0.2673, N_NRI = 1,584 vs N_CC = 371 (ratio 4.27)
-  best case:  omega1 = 0.05, omega2 = 0.35 -> power 0.9993
+  worst case: omega1 = 0.2, omega0 = 0.02 -> power 0.2673, N_NRI = 1,584 vs N_CC = 371 (ratio 4.27)
+  best case:  omega1 = 0.05, omega0 = 0.35 -> power 0.9993
 exact power, NRI formula: [0.8004, 0.8099]  (target 0.8)
 
 ################ Figure S2 (unequal dropout, full-data null) ################
-p1 = p2 in {0.3, 0.5, 0.7}, omega1 = 0.1, n = 250 per group, alpha = 0.025
-at omega2 = omega1: delta_NRI = [0.0000, 0.0000], rejection probability = [0.0245, 0.0266]
+pi1 = pi0 in {0.3, 0.5, 0.7}, omega1 = 0.1, n = 250 per group, alpha = 0.025
+at omega0 = omega1: delta_NRI = [0.0000, 0.0000], rejection probability = [0.0245, 0.0266]
   -> at equal dropout the NRI effect is zero and the test is at level: TRUE
-  p = 0.3: delta_NRI [-0.0240, 0.0750], rejection probability [0.0053, 0.5120]
-  p = 0.5: delta_NRI [-0.0400, 0.1250], rejection probability [0.0024, 0.8186]
-  p = 0.7: delta_NRI [-0.0560, 0.1750], rejection probability [0.0005, 0.9784]
+  pi = 0.3: delta_NRI [-0.0240, 0.0750], rejection probability [0.0053, 0.5120]
+  pi = 0.5: delta_NRI [-0.0400, 0.1250], rejection probability [0.0024, 0.8186]
+  pi = 0.7: delta_NRI [-0.0560, 0.1750], rejection probability [0.0005, 0.9784]
 size against the NRI null (should stay near alpha): [0.0245, 0.0270]
 
 ################ Figure S3 (unequal correlations) ################
-p1 = 0.45, p2 = 0.3, omega = 0.1
-rho1 in [-0.302, 0.369], rho2 in [-0.218, 0.509]
+pi1 = 0.45, pi0 = 0.3, omega = 0.1
+rho1 in [-0.302, 0.369], rho0 in [-0.218, 0.509]
 N_CC = 364 throughout (it does not depend on rho): TRUE
 N_NRI range: [108, 2,754]
 RE range: [0.132, 3.370]
   -> RE exceeds 1 in 2294 of 3721 grid points (61.650 percent)
-  -> at rho1 = rho2 = 0 the RE is 0.948
-  -> on the diagonal rho1 = rho2 (61 points over rho in [-0.218, 0.369]) the RE is [0.948, 0.973], below 1 at 61 of 61
+  -> at rho1 = rho0 = 0 the RE is 0.948
+  -> on the diagonal rho1 = rho0 (61 points over rho in [-0.218, 0.369]) the RE is [0.948, 0.973], below 1 at 61 of 61
      maximum on the diagonal 0.973 at rho = 0.329
-     so every RE above 1 in this figure requires rho1 to differ from rho2; the caption must say so
+     so every RE above 1 in this figure requires rho1 to differ from rho0; the caption must say so
 
 ################ Figures S4 and S5 (effect ordering) ################
-delta_Trad = 0.15
-  panel 'dropout': delta_NRI - delta_Trad in [-0.1770, 0.1155]; positive at 32.591 percent of the grid
-  panel 'correlation': delta_NRI - delta_Trad in [-0.1000, 0.1000]; positive at 49.383 percent of the grid
-  dropout panel: the NRI effect exceeds the full-data effect when omega2 / omega1 > p1 / p2 = 1.500
+delta_Full = 0.15
+  panel 'dropout': delta_NRI - delta_Full in [-0.1770, 0.1155]; positive at 32.591 percent of the grid
+  panel 'correlation': delta_NRI - delta_Full in [-0.1000, 0.1000]; positive at 49.383 percent of the grid
+  dropout panel: the NRI effect exceeds the full-data effect when omega0 / omega1 > pi1 / pi0 = 1.500
 
 ################ Figure S6 (conservative dropout) ################
-p1 = 0.45, p2 = 0.3, rho = 0
-dropout-free sample size N_Trad = 326
+pi1 = 0.45, pi0 = 0.3, rho = 0
+dropout-free sample size N_Full = 326
 true omega in [0.05, 0.3]
 assumption needed, omega*: [0.074, 0.405]
 gap omega* - omega: [0.024, 0.105]
@@ -145,18 +145,18 @@ gap omega* - omega: [0.024, 0.105]
 ################ Table S2 (allocation ratio) ################
 r values: 0.5, 1, 2, 3
 RE range overall: [0.838, 0.948]
-  p = (0.45, 0.3), omega = 0.1: RE [0.938, 0.948]  (spread 0.010)
-  p = (0.45, 0.3), omega = 0.2: RE [0.885, 0.901]  (spread 0.016)
-  p = (0.55, 0.4), omega = 0.1: RE [0.915, 0.921]  (spread 0.006)
-  p = (0.55, 0.4), omega = 0.2: RE [0.838, 0.854]  (spread 0.016)
+  pi = (0.45, 0.3), omega = 0.1: RE [0.938, 0.948]  (spread 0.010)
+  pi = (0.45, 0.3), omega = 0.2: RE [0.885, 0.901]  (spread 0.016)
+  pi = (0.55, 0.4), omega = 0.1: RE [0.915, 0.921]  (spread 0.006)
+  pi = (0.55, 0.4), omega = 0.2: RE [0.838, 0.854]  (spread 0.016)
   -> largest spread in RE attributable to r, within a parameter set: 0.016
 
 ################ Table S3 (null nuisance parameter) ################
-design: n1 = n2 = 192, p1 = 0.45, p2 = 0.3, omega = 0.1, alpha = 0.025
-  NRI: type I error [0.0232, 0.0260] over p_null in [0.1000, 0.5000]
+design: n1 = n0 = 192, pi1 = 0.45, pi0 = 0.3, omega = 0.1, alpha = 0.025
+  NRI: type I error [0.0232, 0.0260] over pi_null in [0.1000, 0.5000]
     exceeds alpha at 3 of 7 values; maximum 0.0260 (4.034 percent above nominal)
     value at the weighted average used in the main text: 0.0248
-  CC: type I error [0.0250, 0.0252] over p_null in [0.1000, 0.5000]
+  CC: type I error [0.0250, 0.0252] over pi_null in [0.1000, 0.5000]
     exceeds alpha at 5 of 6 values; maximum 0.0252 (0.603 percent above nominal)
     value at the weighted average used in the main text: 0.0251
   -> the Z-test is not exact, so its size varies with the nuisance
@@ -164,7 +164,7 @@ design: n1 = n2 = 192, p1 = 0.45, p2 = 0.3, omega = 0.1, alpha = 0.025
      property of the test statistic, not of the sample size formula.
 
 ################ Table S4 (unequal dropout counterexample) ################
-design: p1 = 0.45, p2 = 0.3, rho1 = rho2 = 0, alpha = 0.025, target power = 0.8
+design: pi1 = 0.45, pi0 = 0.3, rho1 = rho0 = 0, alpha = 0.025, target power = 0.8
   omega = (0.10, 0.10): n_complete = 163, n = (182, 182), power = 0.8048, type I error = 0.0251
   omega = (0.05, 0.20): n_complete = 163, n = (172, 204), power = 0.8035, type I error = 0.0253
   omega = (0.20, 0.05): n_complete = 163, n = (204, 172), power = 0.8035, type I error = 0.0250
@@ -177,13 +177,13 @@ exact power across the counterexamples: [0.8033, 0.8048]
 
 ################ Figure S7 (partial identification) ################
 historical rate 0.41 with omega = 0.1 from 620 randomized; targeted difference 0.06
-  Dropouts counted as non-responders: latent p2 in [0.410, 0.510], width 0.100
+  Dropouts counted as non-responders: latent pi0 in [0.410, 0.510], width 0.100
       Common correlation: N_CC [2,388, 2,420], N_NRI [2,590, 2,648], RE [0.913, 0.923] (95 of 101 grid points attainable)
       Common dropout response probability: N_CC [2,388, 2,420], N_NRI [2,148, 2,148], RE [1.112, 1.127] (101 of 101 grid points attainable)
-  Complete case: latent p2 in [0.369, 0.469], width 0.100
+  Complete case: latent pi0 in [0.369, 0.469], width 0.100
       Common correlation: N_CC [2,324, 2,420], N_NRI [2,486, 2,592], RE [0.927, 0.937] (94 of 101 grid points attainable)
       Common dropout response probability: N_CC [2,324, 2,420], N_NRI [2,090, 2,090], RE [1.112, 1.158] (101 of 101 grid points attainable)
-  Dropouts counted as responders: latent p2 in [0.310, 0.410], width 0.100
+  Dropouts counted as responders: latent pi0 in [0.310, 0.410], width 0.100
       Common correlation: N_CC [2,174, 2,378], N_NRI [2,290, 2,482], RE [0.943, 0.958] (94 of 101 grid points attainable)
       Common dropout response probability: N_CC [2,174, 2,388], N_NRI [1,956, 1,956], RE [1.111, 1.221] (101 of 101 grid points attainable)
 RE below 1 at 283 of 586 attainable grid points; overall RE [0.913, 1.221]

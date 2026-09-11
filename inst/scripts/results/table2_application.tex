@@ -1,12 +1,12 @@
 \begin{table}[htbp]
   \centering
   \setlength{\tabcolsep}{4pt}
-  \caption{Required sample sizes for the cytisine trial under the design assumptions of the original trial: $p_{1} = 0.47$, $p_{2} = 0.41$, $\omega_{1} = \omega_{2} = 0.10$, $r = 1$, $\alpha = 0.025$ (one-sided) and target power $= 0.8$. The simple inflation method gives $N_{\mathrm{CC}} = 2,388$, which is the sample size the trial enrolled.}
+  \caption{Required sample sizes for the cytisine trial under the design assumptions of the original trial: $\pi_{1} = 0.47$, $\pi_{0} = 0.41$, $\omega_{1} = \omega_{0} = 0.10$, $r = 1$, $\alpha = 0.025$ (one-sided) and target power $= 0.8$. The simple inflation method gives $N_{\mathrm{CC}} = 2,388$, which is the sample size the trial enrolled.}
   \label{tab:application}
   \begin{threeparttable}
   \begin{tabular}{lccccccrr}
     \toprule
-    $\rho$ & $\gamma_{1}$ & $\gamma_{2}$ & $p_{1,\mathrm{NRI}}$ & $p_{2,\mathrm{NRI}}$ & $\delta_{\mathrm{NRI}}$ & $N_{\mathrm{CC}}$ & $N_{\mathrm{NRI}}$ & RE \\
+    $\rho$ & $\gamma_{1}$ & $\gamma_{0}$ & $\pi_{1,\mathrm{NRI}}$ & $\pi_{0,\mathrm{NRI}}$ & $\delta_{\mathrm{NRI}}$ & $N_{\mathrm{CC}}$ & $N_{\mathrm{NRI}}$ & RE \\
     \midrule
     $L$ (-0.278) & 0.054 & 0.000 & 0.4646 & 0.4100 & 0.0546 & 2,388 & 2,590 & 0.92 \\
     $0$ & 0.470 & 0.410 & 0.4230 & 0.3690 & 0.0540 & 2,388 & 2,574 & 0.93 \\
@@ -14,7 +14,7 @@
     \bottomrule
   \end{tabular}
   \begin{tablenotes}[flushleft]\footnotesize
-    \item $L$ and $U$ denote the lower and upper attainable values of $\rho$ given the marginal probabilities. $\gamma_{j} = \Pr(R_{j} = 1 \mid D_{j} = 1)$ is the probability that a dropout in group $j$ would have responded, which is the same assumption as $\rho$ expressed on the probability scale; a common $\rho$ implies different $\gamma_{j}$ in the two groups because the response probabilities differ. $p_{j,\mathrm{NRI}} = \Pr(R_{j} = 1, D_{j} = 0)$ is the response probability an NRI analysis observes, and $\delta_{\mathrm{NRI}} = p_{1,\mathrm{NRI}} - p_{2,\mathrm{NRI}}$ is the effect it is powered against; the corresponding full-data effect is $\delta_{\mathrm{Trad}} = 0.06$. RE $= N_{\mathrm{CC}} / N_{\mathrm{NRI}}$.
+    \item $L$ and $U$ denote the lower and upper attainable values of $\rho$ given the marginal probabilities. $\gamma_{j} = \Pr(R_{ij} = 1 \mid D_{ij} = 1)$ is the probability that a dropout in group $j$ would have responded, which is the same assumption as $\rho$ expressed on the probability scale; a common $\rho$ implies different $\gamma_{j}$ in the two groups because the response probabilities differ. $\pi_{j,\mathrm{NRI}} = \Pr(R_{ij} = 1, D_{ij} = 0)$ is the response probability an NRI analysis observes, and $\delta_{\mathrm{NRI}} = \pi_{1,\mathrm{NRI}} - \pi_{0,\mathrm{NRI}}$ is the effect it is powered against; the corresponding full-data effect is $\delta_{\mathrm{Full}} = 0.06$. RE $= N_{\mathrm{CC}} / N_{\mathrm{NRI}}$.
   \end{tablenotes}
   \end{threeparttable}
 \end{table}

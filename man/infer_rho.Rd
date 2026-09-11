@@ -5,21 +5,21 @@
 \title{Correlation Implied by a Reported Historical Rate}
 \usage{
 infer_rho(
-  p_obs,
+  pi_obs,
   omega,
-  p = NULL,
+  pi = NULL,
   method = c("nri", "cc", "bc", "wc"),
   group = c("treatment", "control")
 )
 }
 \arguments{
-\item{p_obs}{Numeric. Response probability as reported by the historical
-trial, on the scale implied by \code{method}, 0 <= p_obs <= 1.}
+\item{pi_obs}{Numeric. Response probability as reported by the historical
+trial, on the scale implied by \code{method}, 0 <= pi_obs <= 1.}
 
 \item{omega}{Numeric. Dropout probability in that group,
 0 <= omega < 1.}
 
-\item{p}{Numeric. Assumed latent response probability, 0 < p < 1. Required,
+\item{pi}{Numeric. Assumed latent response probability, 0 < pi < 1. Required,
 because no missing-data handling rule identifies it; use
 \code{\link{latent_bounds}} to obtain the interval it lies in.}
 
@@ -32,7 +32,7 @@ applied: \code{"nri"} (default), \code{"cc"}, \code{"bc"} (best case) or
 }
 \value{
 A \code{data.frame} of class \code{infer_rho} with one row containing
-\code{method}, \code{group}, \code{p_obs}, \code{omega}, \code{p} and
+\code{method}, \code{group}, \code{pi_obs}, \code{omega}, \code{pi} and
 \code{rho}.
 }
 \description{
@@ -41,29 +41,29 @@ that a historical trial's reported response rate implies, for an assumed
 latent response probability.
 }
 \details{
-Given the marginal probabilities p and omega, one joint cell determines the
+Given the marginal probabilities pi and omega, one joint cell determines the
 correlation. The reported rate fixes that cell once it has been placed on the
 NRI scale, so
 
-rho = (p (1 - omega) - p_NRI) / sqrt(p (1 - p) omega (1 - omega)),
+rho = (pi (1 - omega) - pi_NRI) / sqrt(pi (1 - pi) omega (1 - omega)),
 
-with p_NRI equal to p_obs under NRI and to p_obs (1 - omega) under a complete
+with pi_NRI equal to pi_obs under NRI and to pi_obs (1 - omega) under a complete
 case analysis.
 
-The assumed latent probability p is an input, not something the reported rate
-supplies. A rate reported under any of these rules constrains p only to an
+The assumed latent probability pi is an input, not something the reported rate
+supplies. A rate reported under any of these rules constrains pi only to an
 interval of width omega; use \code{\link{latent_bounds}} to obtain that
 interval and treat the resulting correlations as a sensitivity range rather
 than a point estimate. Carrying a single recovered value forward as though it
 were estimated would treat the historical trial's counting convention as a
 statement about its patients' unobserved outcomes.
 
-p_NRI is the reported rate placed on the NRI scale, which is an identity in
-every case: p_obs when the rule counted dropouts as non-responders, which is
+pi_NRI is the reported rate placed on the NRI scale, which is an identity in
+every case: pi_obs when the rule counted dropouts as non-responders, which is
 NRI in both groups, a best case analysis in the control group and a worst
-case analysis in the treatment group; p_obs - omega when it counted them as
+case analysis in the treatment group; pi_obs - omega when it counted them as
 responders, which is a best case analysis in the treatment group and a worst
-case analysis in the control group; and p_obs (1 - omega) under a complete
+case analysis in the control group; and pi_obs (1 - omega) under a complete
 case analysis.
 
 No rule identifies the correlation on its own. Setting a joint cell to zero,
@@ -75,14 +75,14 @@ the interval rather than a consequence of the analysis rule.
 
 When the implied correlation falls outside the range a bivariate Bernoulli
 distribution admits, a warning is issued: that combination of reported rate,
-dropout probability and assumed p is not attainable.
+dropout probability and assumed pi is not attainable.
 }
 \examples{
-# Reported 40 percent under NRI with 15 percent dropout; the latent p is
+# Reported 40 percent under NRI with 15 percent dropout; the latent pi is
 # identified only within [0.40, 0.55], so sweep that range
-lb <- latent_bounds(p_obs = 0.40, N_randomized = 200, N_dropout = 30)
-for (p in c(lb$p_lower + 0.01, lb$p_midpoint, lb$p_upper - 0.01)) {
-  print(infer_rho(p_obs = 0.40, omega = lb$omega, p = p, method = "nri"))
+lb <- latent_bounds(pi_obs = 0.40, N_randomized = 200, N_dropout = 30)
+for (pi in c(lb$pi_lower + 0.01, lb$pi_midpoint, lb$pi_upper - 0.01)) {
+  print(infer_rho(pi_obs = 0.40, omega = lb$omega, pi = pi, method = "nri"))
 }
 
 }

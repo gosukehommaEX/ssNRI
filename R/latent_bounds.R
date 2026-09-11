@@ -5,8 +5,8 @@
 #' number of dropouts, returns the range of latent response probabilities
 #' compatible with what was reported.
 #'
-#' @param p_obs Numeric. Response probability as reported by the historical
-#'   trial, on the scale implied by \code{method}, 0 <= p_obs <= 1.
+#' @param pi_obs Numeric. Response probability as reported by the historical
+#'   trial, on the scale implied by \code{method}, 0 <= pi_obs <= 1.
 #' @param N_randomized Integer. Number of patients randomized in that group.
 #' @param N_dropout Integer. Number of dropouts in that group,
 #'   0 <= N_dropout <= N_randomized.
@@ -18,8 +18,8 @@
 #'   best and worst case rules, which are asymmetric across groups.
 #'
 #' @return A \code{data.frame} of class \code{latent_bounds} with one row
-#' containing the inputs together with \code{omega}, \code{p_nri},
-#' \code{p_lower}, \code{p_upper} and \code{p_midpoint}.
+#' containing the inputs together with \code{omega}, \code{pi_nri},
+#' \code{pi_lower}, \code{pi_upper} and \code{pi_midpoint}.
 #'
 #' @details
 #' A historical trial reports a rate produced by an analysis rule. The rule is
@@ -30,27 +30,27 @@
 #'
 #' Every rule is first placed on the NRI scale, that is on the joint probability
 #' of responding and completing. Counting dropouts as non-responders reports
-#' that joint probability directly, so p_NRI = p_obs; this is what NRI does in
+#' that joint probability directly, so pi_NRI = pi_obs; this is what NRI does in
 #' both groups, what a best case analysis does in the control group and what a
 #' worst case analysis does in the treatment group. Counting dropouts as
-#' responders adds the whole dropout probability, so p_NRI = p_obs - omega; this
+#' responders adds the whole dropout probability, so pi_NRI = pi_obs - omega; this
 #' is what a best case analysis does in the treatment group and a worst case
 #' analysis in the control group. A complete case analysis reports the rate
-#' conditional on completing, so p_NRI = p_obs (1 - omega). Each conversion is an
+#' conditional on completing, so pi_NRI = pi_obs (1 - omega). Each conversion is an
 #' identity and requires no assumption about the missingness mechanism.
 #'
-#' The latent probability then lies between p_NRI, attained when no dropout
-#' would have responded, and p_NRI + omega, attained when every dropout would
+#' The latent probability then lies between pi_NRI, attained when no dropout
+#' would have responded, and pi_NRI + omega, attained when every dropout would
 #' have responded:
 #'
-#'   p_lower = p_NRI,   p_upper = p_NRI + omega.
+#'   pi_lower = pi_NRI,   pi_upper = pi_NRI + omega.
 #'
 #' The width of the interval is exactly omega, so a historical trial with little
 #' dropout pins the latent probability down tightly and one with heavy dropout
 #' barely constrains it. Setting a joint cell to zero, as is sometimes done to
 #' read a latent probability off a best or worst case rate, selects one endpoint
 #' of this interval rather than identifying a point: the value that a best case
-#' treatment rate is often taken to give is p_upper, and it carries the
+#' treatment rate is often taken to give is pi_upper, and it carries the
 #' assumption that every dropout in that group would have responded.
 #'
 #' Planning should carry the interval rather than a single recovered value: pass
@@ -64,20 +64,20 @@
 #'
 #' @examples
 #' # A historical trial reporting 40 percent under NRI, with 15 percent dropout
-#' latent_bounds(p_obs = 0.40, N_randomized = 200, N_dropout = 30)
+#' latent_bounds(pi_obs = 0.40, N_randomized = 200, N_dropout = 30)
 #'
 #' # The same trial reported on the complete case scale
-#' latent_bounds(p_obs = 0.47, N_randomized = 200, N_dropout = 30,
+#' latent_bounds(pi_obs = 0.47, N_randomized = 200, N_dropout = 30,
 #'               method = "cc")
 #'
 #' # A best case rate in the treatment group counts dropouts as responders
-#' latent_bounds(p_obs = 0.55, N_randomized = 200, N_dropout = 30,
+#' latent_bounds(pi_obs = 0.55, N_randomized = 200, N_dropout = 30,
 #'               method = "bc", group = "treatment")
 #'
 #' @seealso \code{\link{infer_rho}}, \code{\link{sample_size_nri}}
 #'
 #' @export
-latent_bounds <- function(p_obs, N_randomized, N_dropout,
+latent_bounds <- function(pi_obs, N_randomized, N_dropout,
                           method = c("nri", "cc", "bc", "wc"),
                           group  = c("treatment", "control")) {
 
@@ -85,7 +85,7 @@ latent_bounds <- function(p_obs, N_randomized, N_dropout,
   group  <- match.arg(group)
 
   # Input validation
-  if (p_obs < 0 || p_obs > 1) stop("p_obs must be between 0 and 1")
+  if (pi_obs < 0 || pi_obs > 1) stop("pi_obs must be between 0 and 1")
   if (N_randomized <= 0 || N_randomized != round(N_randomized)) {
     stop("N_randomized must be a positive integer")
   }
@@ -98,18 +98,18 @@ latent_bounds <- function(p_obs, N_randomized, N_dropout,
 
   # Special case: no dropout, so the latent probability is identified
   if (omega == 0) {
-    message("No dropout observed. The latent p equals p_obs with certainty.")
+    message("No dropout observed. The latent pi equals pi_obs with certainty.")
     result <- data.frame(
       method       = method,
       group        = group,
-      p_obs        = p_obs,
+      pi_obs        = pi_obs,
       N_randomized = N_randomized,
       N_dropout    = 0L,
       omega        = 0,
-      p_nri        = p_obs,
-      p_lower      = p_obs,
-      p_upper      = p_obs,
-      p_midpoint   = p_obs,
+      pi_nri        = pi_obs,
+      pi_lower      = pi_obs,
+      pi_upper      = pi_obs,
+      pi_midpoint   = pi_obs,
       stringsAsFactors = FALSE
     )
     class(result) <- c("latent_bounds", "data.frame")
@@ -122,53 +122,53 @@ latent_bounds <- function(p_obs, N_randomized, N_dropout,
     (method == "wc" && group == "control")
 
   # Place the reported rate on the NRI scale; each conversion is an identity
-  p_nri <- if (method == "cc") {
-    p_obs * (1 - omega)
+  pi_nri <- if (method == "cc") {
+    pi_obs * (1 - omega)
   } else if (counts_dropouts_as_responders) {
-    p_obs - omega
+    pi_obs - omega
   } else {
-    p_obs
+    pi_obs
   }
 
   # No dropout would have responded, versus every dropout would have
-  p_lower <- p_nri
-  p_upper <- p_nri + omega
+  pi_lower <- pi_nri
+  pi_upper <- pi_nri + omega
 
-  if (p_lower < 0) {
+  if (pi_lower < 0) {
     warning(paste0(
-      "Lower bound p_lower = ", round(p_lower, 3), " is below 0. ",
+      "Lower bound pi_lower = ", round(pi_lower, 3), " is below 0. ",
       "This indicates inconsistency in the reported data: the reported rate ",
       "is smaller than the dropout probability, which the stated method ",
-      "makes impossible. Setting p_lower = 0.\n",
-      "Please verify: p_obs = ", p_obs, ", omega = ", round(omega, 3),
+      "makes impossible. Setting pi_lower = 0.\n",
+      "Please verify: pi_obs = ", pi_obs, ", omega = ", round(omega, 3),
       ", method = \"", method, "\", group = \"", group, "\""
     ))
-    p_lower <- 0
+    pi_lower <- 0
   }
 
-  if (p_upper > 1) {
+  if (pi_upper > 1) {
     warning(paste0(
-      "Upper bound p_upper = ", round(p_upper, 3), " exceeds 1. ",
+      "Upper bound pi_upper = ", round(pi_upper, 3), " exceeds 1. ",
       "This indicates inconsistency in the reported data: the stated ",
-      "method may not have been applied, or p_obs and omega are ",
-      "incompatible. Setting p_upper = 1.\n",
-      "Please verify: p_obs = ", p_obs, ", omega = ", round(omega, 3),
+      "method may not have been applied, or pi_obs and omega are ",
+      "incompatible. Setting pi_upper = 1.\n",
+      "Please verify: pi_obs = ", pi_obs, ", omega = ", round(omega, 3),
       ", method = \"", method, "\", group = \"", group, "\""
     ))
-    p_upper <- 1
+    pi_upper <- 1
   }
 
   result <- data.frame(
     method       = method,
     group        = group,
-    p_obs        = p_obs,
+    pi_obs        = pi_obs,
     N_randomized = N_randomized,
     N_dropout    = N_dropout,
     omega        = omega,
-    p_nri        = p_nri,
-    p_lower      = p_lower,
-    p_upper      = p_upper,
-    p_midpoint   = (p_lower + p_upper) / 2,
+    pi_nri        = pi_nri,
+    pi_lower      = pi_lower,
+    pi_upper      = pi_upper,
+    pi_midpoint   = (pi_lower + pi_upper) / 2,
     stringsAsFactors = FALSE
   )
 
@@ -189,19 +189,19 @@ print.latent_bounds <- function(x, ...) {
   cat("\nIdentified Range for the Latent Response Probability\n")
   cat("=====================================================\n\n")
   cat("Reported data:\n")
-  cat(sprintf("         method = %s\n",     x$method))
-  cat(sprintf("          group = %s\n",     x$group))
-  cat(sprintf("          p_obs = %.4f\n",   x$p_obs))
-  cat(sprintf("   N_randomized = %d\n",     x$N_randomized))
-  cat(sprintf("      N_dropout = %d\n",     x$N_dropout))
-  cat(sprintf("          omega = %.4f\n",   x$omega))
-  cat(sprintf("          p_NRI = %.4f  (reported rate on the NRI scale)\n\n",
-              x$p_nri))
-  cat("Compatible range for the latent p:\n")
-  cat(sprintf("        p_lower = %.4f\n", x$p_lower))
-  cat(sprintf("     p_midpoint = %.4f\n", x$p_midpoint))
-  cat(sprintf("        p_upper = %.4f\n", x$p_upper))
-  cat(sprintf("          width = %.4f\n", x$p_upper - x$p_lower))
+  cat(sprintf("        method = %s\n",     x$method))
+  cat(sprintf("         group = %s\n",     x$group))
+  cat(sprintf("        pi_obs = %.4f\n",   x$pi_obs))
+  cat(sprintf("  N_randomized = %d\n",     x$N_randomized))
+  cat(sprintf("     N_dropout = %d\n",     x$N_dropout))
+  cat(sprintf("         omega = %.4f\n",   x$omega))
+  cat(sprintf("        pi_NRI = %.4f  (reported rate on the NRI scale)\n\n",
+              x$pi_nri))
+  cat("Compatible range for the latent pi:\n")
+  cat(sprintf("      pi_lower = %.4f\n", x$pi_lower))
+  cat(sprintf("   pi_midpoint = %.4f\n", x$pi_midpoint))
+  cat(sprintf("      pi_upper = %.4f\n", x$pi_upper))
+  cat(sprintf("         width = %.4f\n", x$pi_upper - x$pi_lower))
   invisible(x)
 }
 
@@ -220,7 +220,7 @@ print.latent_bounds <- function(x, ...) {
 #' @return A \code{ggplot} object.
 #'
 #' @examples
-#' lb <- latent_bounds(p_obs = 0.40, N_randomized = 200, N_dropout = 30)
+#' lb <- latent_bounds(pi_obs = 0.40, N_randomized = 200, N_dropout = 30)
 #' plot(lb, n_points = 21)
 #'
 #' @importFrom rlang .data
@@ -235,23 +235,23 @@ plot.latent_bounds <- function(x, n_points = 101, ...) {
   }
 
   omega <- x$omega
-  p_nri <- x$p_nri
+  pi_nri <- x$pi_nri
 
-  grid <- seq(x$p_lower, x$p_upper, length.out = n_points)
+  grid <- seq(x$pi_lower, x$pi_upper, length.out = n_points)
   grid <- grid[grid > 0 & grid < 1]
   if (length(grid) < 3) {
     stop("The identified range is too close to 0 or 1 to plot", call. = FALSE)
   }
 
-  implied <- (grid * (1 - omega) - p_nri) /
+  implied <- (grid * (1 - omega) - pi_nri) /
     sqrt(grid * (1 - grid) * omega * (1 - omega))
   bnd <- vapply(grid, function(g) {
-    b <- rho_bounds(p = g, omega = omega)
+    b <- rho_bounds(pi = g, omega = omega)
     c(b$rho_lower, b$rho_upper)
   }, numeric(2))
 
   dat <- data.frame(
-    p = rep(grid, 3),
+    pi = rep(grid, 3),
     rho = c(implied, bnd[1, ], bnd[2, ]),
     series = factor(rep(c("Implied by the reported rate",
                           "Feasible range", "Feasible range"),
@@ -262,17 +262,21 @@ plot.latent_bounds <- function(x, n_points = 101, ...) {
   )
 
   ggplot2::ggplot(
-    dat, ggplot2::aes(x = .data$p, y = .data$rho,
+    dat, ggplot2::aes(x = .data$pi, y = .data$rho,
                       group = .data$grp, linetype = .data$series)
   ) +
     ggplot2::geom_line(linewidth = 1) +
     ggplot2::labs(
-      x = "Candidate latent response probability",
+      x = expression(paste("Candidate latent response probability ", pi)),
       y = expression(rho), linetype = NULL,
-      title = sprintf("Reported %.3f under %s in the %s group, omega = %.3f",
-                      x$p_obs, toupper(x$method), x$group, omega),
-      subtitle = sprintf("Latent p is identified only within [%.3f, %.3f]",
-                         x$p_lower, x$p_upper)
+      title = parse(text = sprintf(
+        'paste("Reported %.3f under %s in the %s group, ", omega, " = %.3f")',
+        x$pi_obs, toupper(x$method), x$group, omega
+      )),
+      subtitle = parse(text = sprintf(
+        'paste("Latent ", pi, " is identified only within [%.3f, %.3f]")',
+        x$pi_lower, x$pi_upper
+      ))
     ) +
     ggplot2::theme_bw(base_size = 12) +
     ggplot2::theme(legend.position = "top")

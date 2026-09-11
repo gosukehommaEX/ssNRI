@@ -24,7 +24,7 @@ correlation between the latent response and dropout, together with the range
 that a bivariate Bernoulli distribution admits at each candidate value.
 }
 \examples{
-lb <- latent_bounds(p_obs = 0.40, N_randomized = 200, N_dropout = 30)
+lb <- latent_bounds(pi_obs = 0.40, N_randomized = 200, N_dropout = 30)
 plot(lb, n_points = 21)
 
 }

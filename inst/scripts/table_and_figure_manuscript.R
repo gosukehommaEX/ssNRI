@@ -136,16 +136,16 @@ fig1_long <- f1 %>%
   )
 
 case_levels <- unique(fig1_long$case)
-case_labels_expr <- lapply(unique(fig1_long$p1_value), function(p_val) {
-  case_idx <- which(fig1_data$p1 == p_val)
-  bquote(paste("Case ", .(LETTERS[case_idx]), " (", p[1] == .(p_val), ")"))
+case_labels_expr <- lapply(unique(fig1_long$pi1_value), function(pi_val) {
+  case_idx <- which(fig1_data$pi1 == pi_val)
+  bquote(paste("Case ", .(LETTERS[case_idx]), " (", pi[1] == .(pi_val), ")"))
 })
 fig1_long$case <- factor(fig1_long$case,
                          levels = case_levels,
                          labels = case_labels_expr)
 
 delta_breaks <- sort(unique(fig1_long$delta_val))
-delta_labels <- lapply(delta_breaks, function(x) bquote(delta[Trad] == .(x)))
+delta_labels <- lapply(delta_breaks, function(x) bquote(delta[Full] == .(x)))
 fig1_long$delta_factor <- factor(fig1_long$delta_val, levels = delta_breaks)
 
 fig1 <- ggplot(fig1_long, aes(x = omega, y = value,
@@ -197,7 +197,7 @@ alpha <- fig2_data$alpha
 
 to_long <- function(df, cols, metric_name) {
   df %>%
-    dplyr::select(dplyr::all_of(c("rho", "case", "p1_value", "omega", cols))) %>%
+    dplyr::select(dplyr::all_of(c("rho", "case", "pi1_value", "omega", cols))) %>%
     tidyr::pivot_longer(cols = dplyr::all_of(cols),
                         names_to = "method_raw", values_to = "value") %>%
     dplyr::mutate(
@@ -220,7 +220,7 @@ fig2_long <- dplyr::bind_rows(
 case_levels2 <- unique(fig2_long$case)
 case_labels2 <- vapply(case_levels2, function(label) {
   parts <- strsplit(label, "_")[[1]]
-  deparse(bquote(Case ~ .(parts[2]) ~ "(" * p[1] == .(as.numeric(parts[4])) * ")"))
+  deparse(bquote(Case ~ .(parts[2]) ~ "(" * pi[1] == .(as.numeric(parts[4])) * ")"))
 }, character(1))
 fig2_long$case <- factor(fig2_long$case,
                          levels = case_levels2, labels = case_labels2)
@@ -317,7 +317,7 @@ fig2 <- ggplot(fig2_long, aes(x = rho, y = value,
 save_figure(fig2, "Figure2")
 
 # =============================================================================
-# Figure 3: relative efficiency over the (p1, omega) plane
+# Figure 3: relative efficiency over the (pi1, omega) plane
 # =============================================================================
 
 f3 <- fig3_data$df
@@ -332,9 +332,9 @@ re_breaks <- seq(re_min, re_max, by = contour_step)
 RE_PALETTE <- c("#FFFFFF", "#F0E442", "#E69F00", "#D55E00", "#7B2D00")
 
 f3$delta_label <- factor(f3$delta_label,
-                         levels = paste0("delta[Trad] == ", fig3_data$delta))
+                         levels = paste0("delta[Full] == ", fig3_data$delta))
 
-fig3 <- ggplot(f3, aes(x = omega, y = p1, z = re)) +
+fig3 <- ggplot(f3, aes(x = omega, y = pi1, z = re)) +
   metR::geom_contour_fill(breaks = re_breaks, na.fill = FALSE) +
   facet_wrap(vars(delta_label), ncol = 2, labeller = label_parsed) +
   scale_fill_stepsn(
@@ -356,7 +356,7 @@ fig3 <- ggplot(f3, aes(x = omega, y = p1, z = re)) +
   scale_y_continuous(breaks = seq(0, 1, by = 0.1), expand = c(0, 0)) +
   labs(
     x = expression(paste("Dropout Probability (", omega, ")")),
-    y = expression(paste("Response Probability (", p[1], ")"))
+    y = expression(paste("Response Probability (", pi[1], ")"))
   ) +
   theme_panel() +
   theme(
@@ -397,11 +397,11 @@ tab2_lines <- c(
   "  \\setlength{\\tabcolsep}{4pt}",
   paste0(
     "  \\caption{Required sample sizes for the cytisine trial under the design ",
-    "assumptions of the original trial: $p_{1} = ",
-    formatC(table2_data$p1, digits = 2, format = "f"),
-    "$, $p_{2} = ",
-    formatC(table2_data$p2, digits = 2, format = "f"),
-    "$, $\\omega_{1} = \\omega_{2} = ",
+    "assumptions of the original trial: $\\pi_{1} = ",
+    formatC(table2_data$pi1, digits = 2, format = "f"),
+    "$, $\\pi_{0} = ",
+    formatC(table2_data$pi0, digits = 2, format = "f"),
+    "$, $\\omega_{1} = \\omega_{0} = ",
     formatC(table2_data$omega, digits = 2, format = "f"),
     "$, $r = ", table2_data$r,
     "$, $\\alpha = ", table2_data$alpha,
@@ -415,8 +415,8 @@ tab2_lines <- c(
   "  \\begin{tabular}{lccccccrr}",
   "    \\toprule",
   paste0(
-    "    $\\rho$ & $\\gamma_{1}$ & $\\gamma_{2}$ & ",
-    "$p_{1,\\mathrm{NRI}}$ & $p_{2,\\mathrm{NRI}}$ & ",
+    "    $\\rho$ & $\\gamma_{1}$ & $\\gamma_{0}$ & ",
+    "$\\pi_{1,\\mathrm{NRI}}$ & $\\pi_{0,\\mathrm{NRI}}$ & ",
     "$\\delta_{\\mathrm{NRI}}$ & $N_{\\mathrm{CC}}$ & ",
     "$N_{\\mathrm{NRI}}$ & RE \\\\"
   ),
@@ -428,9 +428,9 @@ for (k in seq_len(nrow(t2))) {
     "    ",
     rho_cell(t2$rho_label[k], t2$rho[k]), " & ",
     fmt_g(t2$gamma1[k]), " & ",
-    fmt_g(t2$gamma2[k]), " & ",
-    fmt_p(t2$p1_NRI[k]), " & ",
-    fmt_p(t2$p2_NRI[k]), " & ",
+    fmt_g(t2$gamma0[k]), " & ",
+    fmt_p(t2$pi1_NRI[k]), " & ",
+    fmt_p(t2$pi0_NRI[k]), " & ",
     fmt_p(t2$effect_NRI[k]), " & ",
     fmt_i(t2$N_cc[k]), " & ",
     fmt_i(t2$N_nri[k]), " & ",
@@ -447,17 +447,17 @@ tab2_lines <- c(
   paste0(
     "    \\item $L$ and $U$ denote the lower and upper attainable values of ",
     "$\\rho$ given the marginal probabilities. ",
-    "$\\gamma_{j} = \\Pr(R_{j} = 1 \\mid D_{j} = 1)$ is the probability ",
+    "$\\gamma_{j} = \\Pr(R_{ij} = 1 \\mid D_{ij} = 1)$ is the probability ",
     "that a dropout in group $j$ would have responded, which is the same ",
     "assumption as $\\rho$ expressed on the probability scale; a common ",
     "$\\rho$ implies different $\\gamma_{j}$ in the two groups because the ",
     "response probabilities differ. ",
-    "$p_{j,\\mathrm{NRI}} = \\Pr(R_{j} = 1, D_{j} = 0)$ is the response ",
+    "$\\pi_{j,\\mathrm{NRI}} = \\Pr(R_{ij} = 1, D_{ij} = 0)$ is the response ",
     "probability an NRI analysis observes, and ",
-    "$\\delta_{\\mathrm{NRI}} = p_{1,\\mathrm{NRI}} - p_{2,\\mathrm{NRI}}$ ",
+    "$\\delta_{\\mathrm{NRI}} = \\pi_{1,\\mathrm{NRI}} - \\pi_{0,\\mathrm{NRI}}$ ",
     "is the effect it is powered against; the corresponding full-data effect ",
-    "is $\\delta_{\\mathrm{Trad}} = ",
-    formatC(t2$effect_latent[1], digits = 2, format = "f"),
+    "is $\\delta_{\\mathrm{Full}} = ",
+    formatC(t2$effect_full[1], digits = 2, format = "f"),
     "$. RE $= N_{\\mathrm{CC}} / N_{\\mathrm{NRI}}$."
   ),
   "  \\end{tablenotes}",

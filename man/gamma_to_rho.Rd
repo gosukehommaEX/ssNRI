@@ -4,10 +4,10 @@
 \alias{gamma_to_rho}
 \title{Convert the Dropout Response Probability to the Response-Dropout Correlation}
 \usage{
-gamma_to_rho(p, omega, gamma)
+gamma_to_rho(pi, omega, gamma)
 }
 \arguments{
-\item{p}{Numeric vector. Latent response probability, 0 < p < 1.}
+\item{pi}{Numeric vector. Latent response probability, 0 < pi < 1.}
 
 \item{omega}{Numeric vector. Dropout probability, 0 < omega < 1.}
 
@@ -24,17 +24,17 @@ among those who drop out into the correlation between the latent response
 indicator and the dropout indicator.
 }
 \details{
-Inverting gamma = p + rho sqrt(p (1 - p) (1 - omega) / omega) gives
+Inverting gamma = pi + rho sqrt(pi (1 - pi) (1 - omega) / omega) gives
 
-rho = (gamma - p) sqrt(omega / (p (1 - p) (1 - omega))).
+rho = (gamma - pi) sqrt(omega / (pi (1 - pi) (1 - omega))).
 
 Values of gamma admissible for the given marginal probabilities map into the
 Frechet-Prentice range returned by \code{\link{rho_bounds}}; see
 \code{\link{gamma_bounds}}.
 }
 \examples{
-gamma_to_rho(p = 0.45, omega = 0.10, gamma = 0.45)
-gamma_to_rho(p = 0.45, omega = 0.10,
+gamma_to_rho(pi = 0.45, omega = 0.10, gamma = 0.45)
+gamma_to_rho(pi = 0.45, omega = 0.10,
              gamma = rho_to_gamma(0.45, 0.10, c(-0.3, 0, 0.3)))
 
 }

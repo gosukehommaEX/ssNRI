@@ -7,16 +7,16 @@ test_that("ggplot2 is available, so the plot tests below are not skipped", {
   expect_true(requireNamespace("ggplot2", quietly = TRUE))
 })
 
-pcc <- power_cc(n1 = 30, n2 = 30, p1 = 0.6, p2 = 0.4,
-                omega1 = 0.2, omega2 = 0.2, rho1 = 0.1, rho2 = 0.1)
-pnri <- power_nri(n1 = 30, n2 = 30, p1 = 0.6, p2 = 0.4,
-                  omega1 = 0.2, omega2 = 0.2)
-sscc <- sample_size_cc(p1 = 0.6, p2 = 0.4, omega1 = 0.2, omega2 = 0.2)
-ssnri <- sample_size_nri(p1 = 0.6, p2 = 0.4, omega1 = 0.2, omega2 = 0.2)
-rb <- rho_bounds(p = 0.4, omega = 0.15)
-lb <- latent_bounds(p_obs = 0.40, N_randomized = 200, N_dropout = 30)
-ir <- infer_rho(p_obs = 0.40, omega = 0.15, p = 0.45, method = "nri")
-gb <- gamma_bounds(p = 0.4, omega = 0.15)
+pcc <- power_cc(n1 = 30, n0 = 30, pi1 = 0.6, pi0 = 0.4,
+                omega1 = 0.2, omega0 = 0.2, rho1 = 0.1, rho0 = 0.1)
+pnri <- power_nri(n1 = 30, n0 = 30, pi1 = 0.6, pi0 = 0.4,
+                  omega1 = 0.2, omega0 = 0.2)
+sscc <- sample_size_cc(pi1 = 0.6, pi0 = 0.4, omega1 = 0.2, omega0 = 0.2)
+ssnri <- sample_size_nri(pi1 = 0.6, pi0 = 0.4, omega1 = 0.2, omega0 = 0.2)
+rb <- rho_bounds(pi = 0.4, omega = 0.15)
+lb <- latent_bounds(pi_obs = 0.40, N_randomized = 200, N_dropout = 30)
+ir <- infer_rho(pi_obs = 0.40, omega = 0.15, pi = 0.45, method = "nri")
+gb <- gamma_bounds(pi = 0.4, omega = 0.15)
 
 objects <- list(power_cc = pcc, power_nri = pnri,
                 sample_size_cc = sscc, sample_size_nri = ssnri,
@@ -71,12 +71,12 @@ test_that("plot methods build a ggplot without error", {
 
 test_that("plot methods reject a degenerate sweep", {
   skip_if_not_installed("ggplot2")
-  no_dropout <- power_cc(n1 = 20, n2 = 20, p1 = 0.6, p2 = 0.4,
-                         omega1 = 0, omega2 = 0)
+  no_dropout <- power_cc(n1 = 20, n0 = 20, pi1 = 0.6, pi0 = 0.4,
+                         omega1 = 0, omega0 = 0)
   expect_error(plot(no_dropout, vary = "rho"), "single point")
 
   expect_message(
-    identified <- latent_bounds(p_obs = 0.4, N_randomized = 100,
+    identified <- latent_bounds(pi_obs = 0.4, N_randomized = 100,
                                 N_dropout = 0)
   )
   expect_error(plot(identified), "nothing to plot")

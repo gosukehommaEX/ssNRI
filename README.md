@@ -21,6 +21,29 @@ a bivariate Bernoulli distribution, so the group-specific dropout probabilities,
 the association between response and dropout, and the allocation ratio can all
 be specified directly.
 
+## Notation
+
+The names used here follow the article. The experimental group is 1 and the
+control group is 0.
+
+| Article | Package | Meaning |
+|---|---|---|
+| `pi_1`, `pi_0` | `pi1`, `pi0` | latent response probability |
+| `omega_1`, `omega_0` | `omega1`, `omega0` | dropout probability |
+| `rho_1`, `rho_0` | `rho1`, `rho0` | response-dropout correlation |
+| `gamma_1`, `gamma_0` | `gamma1`, `gamma0` | response probability among dropouts |
+| `n_1`, `n_0` | `n1`, `n0` | randomized sample size |
+| `r = n_1 / n_0` | `r` | allocation ratio |
+| `pi_{j,NRI}` | `pi1_NRI`, `pi0_NRI` | response probability an NRI analysis observes |
+| `delta_Full` | `effect_full` | full-data treatment effect |
+| `delta_NRI` | `effect_NRI` | effect an NRI analysis is powered against |
+| `bar{pi}` | `pi_null` | common response probability assumed under the null |
+
+The R names transliterate the article's symbols, so a reader moving between the
+two never has to translate: the argument is `pi1`, the printed label is `pi1`,
+and the article writes it as $\pi_1$. Plots use the Greek letters themselves,
+matching the article's figures.
+
 This package accompanies the article
 
 > Homma, G. A Cautionary Note on Sample Size Inflation for Trials with
@@ -60,8 +83,8 @@ simulated and no normal approximation is used at the evaluation stage.
 ``` r
 library(ssNRI)
 
-power_cc(n1 = 60, n2 = 60, p1 = 0.6, p2 = 0.4,
-         omega1 = 0.2, omega2 = 0.2, rho1 = 0, rho2 = 0)
+power_cc(n1 = 60, n0 = 60, pi1 = 0.6, pi0 = 0.4,
+         omega1 = 0.2, omega0 = 0.2, rho1 = 0, rho0 = 0)
 ```
 
 For a complete case analysis the enumeration runs over the number of completers
@@ -83,13 +106,13 @@ most the discarded probability mass.
 The association between response and dropout can be given as a correlation or as
 `gamma`, the probability that a dropout would have responded. The two are in one
 to one correspondence for fixed marginal probabilities, and `gamma` is often the
-easier one to elicit, since the NRI response probability is `p - gamma * omega`:
+easier one to elicit, since the NRI response probability is `pi - gamma * omega`:
 `gamma` is exactly the fraction of dropouts that non-responder imputation
 misclassifies.
 
 ``` r
-rho_to_gamma(p = 0.45, omega = 0.10, rho = 0)      # 0.45, independence
-gamma_bounds(p = 0.45, omega = 0.10)               # and the attainable range
+rho_to_gamma(pi = 0.45, omega = 0.10, rho = 0)      # 0.45, independence
+gamma_bounds(pi = 0.45, omega = 0.10)               # and the attainable range
 ```
 
 ## What a historical trial's reported rate does not tell you
@@ -104,9 +127,9 @@ it implies. Neither function identifies a point, and planning should carry the
 interval through to the sample size.
 
 ``` r
-lb <- latent_bounds(p_obs = 0.41, N_randomized = 620, N_dropout = 62)
-sample_size_nri(p1 = lb$p_lower + 0.06, p2 = lb$p_lower,
-                omega1 = 0.10, omega2 = 0.10)
+lb <- latent_bounds(pi_obs = 0.41, N_randomized = 620, N_dropout = 62)
+sample_size_nri(pi1 = lb$pi_lower + 0.06, pi0 = lb$pi_lower,
+                omega1 = 0.10, omega0 = 0.10)
 ```
 
 ## Reproducing the article

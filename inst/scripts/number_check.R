@@ -49,7 +49,7 @@ d1 <- f1$df
 emit("")
 emit("################ Section 3.1 / Figure 1 ################")
 emit("delta values: ", paste(f1$delta, collapse = ", "))
-emit("p1 values: ", paste(f1$p1, collapse = ", "))
+emit("pi1 values: ", paste(f1$pi1, collapse = ", "))
 emit("omega values (", length(f1$omega_values), " of them): ",
      paste(f1$omega_values, collapse = ", "))
 emit("  -> the text must say ", length(f1$omega_values),
@@ -77,7 +77,7 @@ d2 <- f2$df
 
 emit("")
 emit("################ Section 3.2 / Figure 2 ################")
-emit("delta = ", f2$delta, ", p1 values: ", paste(f2$p1, collapse = ", "),
+emit("delta = ", f2$delta, ", pi1 values: ", paste(f2$pi1, collapse = ", "),
      ", omega values: ", paste(f2$omega_values, collapse = ", "),
      ", rho step = ", f2$rho_step)
 emit("grid points: ", nrow(d2))
@@ -117,7 +117,7 @@ d3 <- f3$df
 emit("")
 emit("################ Section 3.3 / Figure 3 ################")
 emit("delta values: ", paste(f3$delta, collapse = ", "))
-emit("p1 in [", min(f3$p1_values), ", ", max(f3$p1_values), "], omega in [",
+emit("pi1 in [", min(f3$pi1_values), ", ", max(f3$pi1_values), "], omega in [",
      min(f3$omega_values), ", ", max(f3$omega_values), "]")
 emit("grid points: ", nrow(d3))
 emit("relative efficiency range: ", rng3(d3$re))
@@ -136,10 +136,10 @@ dt2 <- t2$df
 
 emit("")
 emit("################ Section 4 / Table 2 (cytisine) ################")
-emit("design assumptions: p1 = ", t2$p1, ", p2 = ", t2$p2,
+emit("design assumptions: pi1 = ", t2$pi1, ", pi0 = ", t2$pi0,
      ", omega = ", t2$omega, ", r = ", t2$r,
      ", alpha = ", t2$alpha, ", target power = ", t2$target_power)
-emit("delta_Trad = ", r2(dt2$effect_latent[1]))
+emit("delta_Full = ", r2(dt2$effect_full[1]))
 emit("N_CC (simple inflation)      = ", int(dt2$N_cc[1]),
      "   [reported by Dogar et al.: ", int(t2$n_reported), "]")
 emit("  match: ", identical(as.numeric(dt2$N_cc[1]), as.numeric(t2$n_reported)))
@@ -147,9 +147,9 @@ emit("N_CC per group = ", int(dt2$N_cc[1] / 2))
 for (k in seq_len(nrow(dt2))) {
   emit("rho = ", dt2$rho_label[k], " (", r3(dt2$rho[k]), "): ",
        "gamma1 = ", r3(dt2$gamma1[k]),
-       ", gamma2 = ", r3(dt2$gamma2[k]),
-       ", p1_NRI = ", r4(dt2$p1_NRI[k]),
-       ", p2_NRI = ", r4(dt2$p2_NRI[k]),
+       ", gamma0 = ", r3(dt2$gamma0[k]),
+       ", pi1_NRI = ", r4(dt2$pi1_NRI[k]),
+       ", pi0_NRI = ", r4(dt2$pi0_NRI[k]),
        ", delta_NRI = ", r4(dt2$effect_NRI[k]),
        ", N_NRI = ", int(dt2$N_nri[k]),
        ", RE = ", r2(dt2$RE[k]))
@@ -165,7 +165,7 @@ emit("")
 emit("################ Section 4 / trial results (AE-M5) ################")
 emit("planned  ", int(app$n_planned), " (", int(ap$n1[1]), " per group); ",
      "enrolled ", int(app$n_enrolled), " (", int(ap$n1[2]), " and ",
-     int(ap$n2[2]), ")")
+     int(ap$n0[2]), ")")
 emit("NRI formula requires ", int(ap$n_total[3]), " (", int(ap$n1[3]),
      " per group)")
 emit("delta_NRI under the design assumptions = ", r4(ap$effect_NRI[1]))
@@ -177,14 +177,14 @@ emit("  -> intended power ", app$target_power, ", attained ",
      r4(ap$power[1]), " at the planned size and ", r4(ap$power[2]),
      " at the size actually enrolled")
 emit("observed (Dogar et al.): ", ob$x1, "/", ap$n1[2], " = ", r3(ob$rate1),
-     " vs ", ob$x2, "/", ap$n2[2], " = ", r3(ob$rate2))
+     " vs ", ob$x0, "/", ap$n0[2], " = ", r3(ob$rate0))
 emit("  risk difference ", r4(ob$risk_difference), " (95% CI ",
      r4(ob$ci_lower), " to ", r4(ob$ci_upper), "), p = ", ob$p_value)
 emit("  observed dropout ", r4(ob$omega1_observed), " and ",
-     r4(ob$omega2_observed), " against the assumed ", app$omega)
+     r4(ob$omega0_observed), " against the assumed ", app$omega)
 emit("  -> the observed difference ", r3(ob$risk_difference), " is ",
-     r2(ob$risk_difference / (app$p1 - app$p2)),
-     " times the assumed ", r2(app$p1 - app$p2),
+     r2(ob$risk_difference / (app$pi1 - app$pi0)),
+     " times the assumed ", r2(app$pi1 - app$pi0),
      ", so the trial's null result is mostly a smaller than assumed effect;")
 emit("     the design-analysis mismatch is a separate, additional loss of ",
      r3(100 * (app$target_power - ap$power[1])), " percentage points of power")
@@ -201,17 +201,17 @@ s1 <- readRDS(file.path(data_si, "tableS1_data.rds"))$df
 emit("")
 emit("################ Table S1 (application sensitivity) ################")
 emit("scenarios: ", nrow(s1), " rows (",
-     length(unique(paste(s1$p1, s1$p2, s1$omega))), " parameter sets x 3 rho)")
+     length(unique(paste(s1$pi1, s1$pi0, s1$omega))), " parameter sets x 3 rho)")
 emit("N_CC range:  ", rngi(s1$N_cc))
 emit("N_NRI range: ", rngi(s1$N_nri))
 emit("RE range:    ", rng3(s1$RE))
 emit("  -> RE is below 1 in all ", sum(s1$RE < 1), " of ", nrow(s1), " rows: ",
      all(s1$RE < 1))
 emit("delta_NRI range: ", rng4(s1$effect_NRI),
-     "  (delta_Trad = ", r2(s1$effect_latent[1]), " throughout: ",
-     length(unique(s1$effect_latent)) == 1, ")")
-key <- s1[s1$p1 == 0.47 & s1$omega == 0.10, ]
-emit("cross-check against main-text Table 2 (p1 = 0.47, omega = 0.10):")
+     "  (delta_Full = ", r2(s1$effect_full[1]), " throughout: ",
+     length(unique(s1$effect_full)) == 1, ")")
+key <- s1[s1$pi1 == 0.47 & s1$omega == 0.10, ]
+emit("cross-check against main-text Table 2 (pi1 = 0.47, omega = 0.10):")
 for (k in seq_len(nrow(key))) {
   emit("  rho = ", key$rho_label[k], ": N_NRI = ", int(key$N_nri[k]),
        ", RE = ", r2(key$RE[k]))
@@ -221,21 +221,21 @@ fs1 <- readRDS(file.path(data_si, "figS1_data.rds"))
 ds1 <- fs1$df
 emit("")
 emit("################ Figure S1 (unequal dropout, alternative) ################")
-emit("p1 = ", fs1$p1, ", p2 = ", fs1$p2, ", rho = 0")
+emit("pi1 = ", fs1$pi1, ", pi0 = ", fs1$pi0, ", rho = 0")
 emit("omega1 values: ", paste(fs1$omega1_values, collapse = ", "),
-     "; omega2 in [", min(ds1$omega2), ", ", max(ds1$omega2), "]")
+     "; omega0 in [", min(ds1$omega0), ", ", max(ds1$omega0), "]")
 emit("delta_NRI range: ", rng4(ds1$effect_NRI),
-     " (delta_Trad = ", r2(ds1$effect_latent[1]), ")")
+     " (delta_Full = ", r2(ds1$effect_full[1]), ")")
 emit("N under the NRI formula:      ", rngi(ds1$N_proposed))
 emit("N under the simple inflation: ", rngi(ds1$N_Simple))
 emit("exact power, simple inflation: ", rng4(ds1$power_Simple))
 w <- ds1[which.min(ds1$power_Simple), ]
-emit("  worst case: omega1 = ", w$omega1, ", omega2 = ", w$omega2,
+emit("  worst case: omega1 = ", w$omega1, ", omega0 = ", w$omega0,
      " -> power ", r4(w$power_Simple),
      ", N_NRI = ", int(w$N_proposed), " vs N_CC = ", int(w$N_Simple),
      " (ratio ", r2(w$N_proposed / w$N_Simple), ")")
 b <- ds1[which.max(ds1$power_Simple), ]
-emit("  best case:  omega1 = ", b$omega1, ", omega2 = ", b$omega2,
+emit("  best case:  omega1 = ", b$omega1, ", omega0 = ", b$omega0,
      " -> power ", r4(b$power_Simple))
 emit("exact power, NRI formula: ", rng4(ds1$power_proposed),
      "  (target ", fs1$target_power, ")")
@@ -244,22 +244,22 @@ fs2 <- readRDS(file.path(data_si, "figS2_data.rds"))
 ds2 <- fs2$df
 emit("")
 emit("################ Figure S2 (unequal dropout, full-data null) ################")
-emit("p1 = p2 in {", paste(fs2$p_values, collapse = ", "), "}, omega1 = ",
+emit("pi1 = pi0 in {", paste(fs2$pi_values, collapse = ", "), "}, omega1 = ",
      fs2$omega1, ", n = ", fs2$n_per_group, " per group, alpha = ", fs2$alpha)
 # seq() with a step produces values that are not exactly representable, so the
 # match against omega1 is made with a tolerance rather than with ==
-eq <- ds2[abs(ds2$omega2 - fs2$omega1) < 1e-8, ]
+eq <- ds2[abs(ds2$omega0 - fs2$omega1) < 1e-8, ]
 if (nrow(eq) == 0) {
-  emit("WARNING: the omega2 grid does not contain omega1 = ", fs2$omega1)
+  emit("WARNING: the omega0 grid does not contain omega1 = ", fs2$omega1)
 } else {
-  emit("at omega2 = omega1: delta_NRI = ", rng4(eq$effect_NRI),
+  emit("at omega0 = omega1: delta_NRI = ", rng4(eq$effect_NRI),
        ", rejection probability = ", rng4(eq$reject_full_null))
   emit("  -> at equal dropout the NRI effect is zero and the test is at level: ",
        all(abs(eq$effect_NRI) < 1e-12))
 }
-for (pv in fs2$p_values) {
-  s <- ds2[ds2$p == pv, ]
-  emit("  p = ", pv, ": delta_NRI ", rng4(s$effect_NRI),
+for (pv in fs2$pi_values) {
+  s <- ds2[ds2$pi == pv, ]
+  emit("  pi = ", pv, ": delta_NRI ", rng4(s$effect_NRI),
        ", rejection probability ", rng4(s$reject_full_null))
 }
 emit("size against the NRI null (should stay near alpha): ",
@@ -269,45 +269,45 @@ fs3 <- readRDS(file.path(data_si, "figS3_data.rds"))
 ds3 <- fs3$df
 emit("")
 emit("################ Figure S3 (unequal correlations) ################")
-emit("p1 = ", fs3$p1, ", p2 = ", fs3$p2, ", omega = ", fs3$omega)
-emit("rho1 in ", rng3(ds3$rho1), ", rho2 in ", rng3(ds3$rho2))
+emit("pi1 = ", fs3$pi1, ", pi0 = ", fs3$pi0, ", omega = ", fs3$omega)
+emit("rho1 in ", rng3(ds3$rho1), ", rho0 in ", rng3(ds3$rho0))
 emit("N_CC = ", int(ds3$N_cc[1]), " throughout (it does not depend on rho): ",
      length(unique(ds3$N_cc)) == 1)
 emit("N_NRI range: ", rngi(ds3$N_nri))
 emit("RE range: ", rng3(ds3$re))
 emit("  -> RE exceeds 1 in ", sum(ds3$re > 1), " of ", nrow(ds3),
      " grid points (", r3(100 * mean(ds3$re > 1)), " percent)")
-emit("  -> at rho1 = rho2 = 0 the RE is ",
-     r3(ds3$re[which.min(abs(ds3$rho1) + abs(ds3$rho2))]))
+emit("  -> at rho1 = rho0 = 0 the RE is ",
+     r3(ds3$re[which.min(abs(ds3$rho1) + abs(ds3$rho0))]))
 dg3 <- fs3$diagonal
-emit("  -> on the diagonal rho1 = rho2 (", nrow(dg3), " points over rho in ",
+emit("  -> on the diagonal rho1 = rho0 (", nrow(dg3), " points over rho in ",
      rng3(dg3$rho), ") the RE is ", rng3(dg3$re),
      ", below 1 at ", sum(dg3$re < 1), " of ", nrow(dg3))
 emit("     maximum on the diagonal ", r3(max(dg3$re)), " at rho = ",
      r3(dg3$rho[which.max(dg3$re)]))
 emit("     so every RE above 1 in this figure requires rho1 to differ from ",
-     "rho2; the caption must say so")
+     "rho0; the caption must say so")
 
 fs45 <- readRDS(file.path(data_si, "figS45_data.rds"))
 ds45 <- fs45$df
 emit("")
 emit("################ Figures S4 and S5 (effect ordering) ################")
-emit("delta_Trad = ", r2(ds45$delta_latent[1]))
+emit("delta_Full = ", r2(ds45$delta_full[1]))
 for (pn in unique(ds45$panel)) {
   s <- ds45[ds45$panel == pn, ]
-  emit("  panel '", pn, "': delta_NRI - delta_Trad in ", rng4(s$diff),
+  emit("  panel '", pn, "': delta_NRI - delta_Full in ", rng4(s$diff),
        "; positive at ", r3(100 * mean(s$diff > 0)), " percent of the grid")
 }
-# The zero contour in the dropout panel is the line omega2 = (p1 / p2) omega1
+# The zero contour in the dropout panel is the line omega0 = (pi1 / pi0) omega1
 emit("  dropout panel: the NRI effect exceeds the full-data effect when ",
-     "omega2 / omega1 > p1 / p2 = ", r3(fs45$p1 / fs45$p2))
+     "omega0 / omega1 > pi1 / pi0 = ", r3(fs45$pi1 / fs45$pi0))
 
 fs6 <- readRDS(file.path(data_si, "figS6_data.rds"))
 ds6 <- fs6$df
 emit("")
 emit("################ Figure S6 (conservative dropout) ################")
-emit("p1 = ", fs6$p1, ", p2 = ", fs6$p2, ", rho = 0")
-emit("dropout-free sample size N_Trad = ", int(ds6$n_trad[1]))
+emit("pi1 = ", fs6$pi1, ", pi0 = ", fs6$pi0, ", rho = 0")
+emit("dropout-free sample size N_Full = ", int(ds6$n_full[1]))
 emit("true omega in [", min(ds6$omega), ", ", max(ds6$omega), "]")
 emit("assumption needed, omega*: ", rng3(ds6$omega_star))
 emit("gap omega* - omega: ", rng3(ds6$inflation_gap))
@@ -325,25 +325,25 @@ emit("")
 emit("################ Table S2 (allocation ratio) ################")
 emit("r values: ", paste(sort(unique(ts2$r)), collapse = ", "))
 emit("RE range overall: ", rng3(ts2$RE))
-for (key in unique(paste(ts2$p1, ts2$p2, ts2$omega))) {
-  s <- ts2[paste(ts2$p1, ts2$p2, ts2$omega) == key, ]
-  emit("  p = (", s$p1[1], ", ", s$p2[1], "), omega = ", s$omega[1],
+for (key in unique(paste(ts2$pi1, ts2$pi0, ts2$omega))) {
+  s <- ts2[paste(ts2$pi1, ts2$pi0, ts2$omega) == key, ]
+  emit("  pi = (", s$pi1[1], ", ", s$pi0[1], "), omega = ", s$omega[1],
        ": RE ", rng3(s$RE), "  (spread ", r3(max(s$RE) - min(s$RE)), ")")
 }
 emit("  -> largest spread in RE attributable to r, within a parameter set: ",
-     r3(max(tapply(ts2$RE, paste(ts2$p1, ts2$p2, ts2$omega),
+     r3(max(tapply(ts2$RE, paste(ts2$pi1, ts2$pi0, ts2$omega),
                    function(z) max(z) - min(z)))))
 
 ts3 <- readRDS(file.path(data_si, "tableS3_data.rds"))
 dt3 <- ts3$df
 emit("")
 emit("################ Table S3 (null nuisance parameter) ################")
-emit("design: n1 = n2 = ", ts3$n1, ", p1 = ", ts3$p1, ", p2 = ", ts3$p2,
+emit("design: n1 = n0 = ", ts3$n1, ", pi1 = ", ts3$pi1, ", pi0 = ", ts3$pi0,
      ", omega = ", ts3$omega, ", alpha = ", ts3$alpha)
 for (an in unique(dt3$analysis)) {
   s <- dt3[dt3$analysis == an, ]
   emit("  ", an, ": type I error ", rng4(s$type1_error),
-       " over p_null in ", rng4(s$p_null))
+       " over pi_null in ", rng4(s$pi_null))
   emit("    exceeds alpha at ", sum(s$type1_error > ts3$alpha), " of ",
        nrow(s), " values; maximum ", r4(max(s$type1_error)),
        " (", r3(100 * (max(s$type1_error) / ts3$alpha - 1)),
@@ -359,13 +359,13 @@ ts4 <- readRDS(file.path(data_si, "tableS4_data.rds"))
 dt4 <- ts4$df
 emit("")
 emit("################ Table S4 (unequal dropout counterexample) ################")
-emit("design: p1 = ", ts4$p1, ", p2 = ", ts4$p2,
-     ", rho1 = rho2 = 0, alpha = ", ts4$alpha,
+emit("design: pi1 = ", ts4$pi1, ", pi0 = ", ts4$pi0,
+     ", rho1 = rho0 = 0, alpha = ", ts4$alpha,
      ", target power = ", ts4$target_power)
 for (k in seq_len(nrow(dt4))) {
-  emit("  omega = (", r2(dt4$omega1[k]), ", ", r2(dt4$omega2[k]), "): ",
+  emit("  omega = (", r2(dt4$omega1[k]), ", ", r2(dt4$omega0[k]), "): ",
        "n_complete = ", int(dt4$n_complete[k]),
-       ", n = (", int(dt4$n1[k]), ", ", int(dt4$n2[k]), "), ",
+       ", n = (", int(dt4$n1[k]), ", ", int(dt4$n0[k]), "), ",
        "power = ", r4(dt4$power[k]),
        ", type I error = ", r4(dt4$type1_error[k]))
 }
@@ -378,14 +378,14 @@ f7 <- readRDS(file.path(data_si, "figS7_data.rds"))
 d7 <- f7$df
 emit("")
 emit("################ Figure S7 (partial identification) ################")
-emit("historical rate ", f7$p_obs, " with omega = ", f7$omega,
+emit("historical rate ", f7$pi_obs, " with omega = ", f7$omega,
      " from ", int(f7$n_hist), " randomized; targeted difference ",
      f7$delta)
 for (rl in unique(d7$rule)) {
   sub <- d7[d7$rule == rl, ]
-  emit("  ", rl, ": latent p2 in [", r3(sub$p_lower[1]), ", ",
-       r3(sub$p_upper[1]), "], width ",
-       r3(sub$p_upper[1] - sub$p_lower[1]))
+  emit("  ", rl, ": latent pi0 in [", r3(sub$pi_lower[1]), ", ",
+       r3(sub$pi_upper[1]), "], width ",
+       r3(sub$pi_upper[1] - sub$pi_lower[1]))
   for (cv in unique(sub$convention)) {
     z <- sub[sub$convention == cv & sub$feasible, ]
     emit("      ", cv, ": N_CC ", rngi(z$n_cc), ", N_NRI ", rngi(z$n_nri),

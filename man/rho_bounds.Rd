@@ -4,16 +4,16 @@
 \alias{rho_bounds}
 \title{Feasible Range of the Response-Dropout Correlation}
 \usage{
-rho_bounds(p, omega)
+rho_bounds(pi, omega)
 }
 \arguments{
-\item{p}{Numeric. Latent response probability, 0 < p < 1.}
+\item{pi}{Numeric. Latent response probability, 0 < pi < 1.}
 
 \item{omega}{Numeric. Dropout probability, 0 <= omega < 1.}
 }
 \value{
 A \code{data.frame} of class \code{rho_bounds} with one row containing
-\code{p}, \code{omega}, \code{rho_lower} and \code{rho_upper}.
+\code{pi}, \code{omega}, \code{rho_lower} and \code{rho_upper}.
 }
 \description{
 Returns the feasible range of the correlation between the latent response
@@ -23,22 +23,22 @@ interval from -1 to 1; the attainable range follows from the Frechet bounds
 and was given for binary variables by Prentice (1988).
 }
 \details{
-For binary R with P(R = 1) = p and binary D with P(D = 1) = omega, the
+For binary R with P(R = 1) = pi and binary D with P(D = 1) = omega, the
 correlation is confined to
 
-rho_lower = max(-sqrt(p omega / ((1 - p)(1 - omega))),
--sqrt((1 - p)(1 - omega) / (p omega)))
+rho_lower = max(-sqrt(pi omega / ((1 - pi)(1 - omega))),
+-sqrt((1 - pi)(1 - omega) / (pi omega)))
 
-rho_upper = min( sqrt(p (1 - omega) / (omega (1 - p))),
-sqrt(omega (1 - p) / (p (1 - omega))))
+rho_upper = min( sqrt(pi (1 - omega) / (omega (1 - pi))),
+sqrt(omega (1 - pi) / (pi (1 - omega))))
 
 When omega = 0 there is no dropout and the correlation is not defined; the
 degenerate range from 0 to 0 is returned so that callers can treat this case
 without a special branch.
 }
 \examples{
-rho_bounds(p = 0.35, omega = 0.10)
-rho_bounds(p = 0.60, omega = 0.25)
+rho_bounds(pi = 0.35, omega = 0.10)
+rho_bounds(pi = 0.60, omega = 0.25)
 
 }
 \references{

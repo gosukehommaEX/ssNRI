@@ -4,10 +4,10 @@
 \alias{rho_to_gamma}
 \title{Convert the Response-Dropout Correlation to the Dropout Response Probability}
 \usage{
-rho_to_gamma(p, omega, rho)
+rho_to_gamma(pi, omega, rho)
 }
 \arguments{
-\item{p}{Numeric vector. Latent response probability, 0 < p < 1.}
+\item{pi}{Numeric vector. Latent response probability, 0 < pi < 1.}
 
 \item{omega}{Numeric vector. Dropout probability, 0 < omega < 1.}
 
@@ -28,14 +28,14 @@ probabilities.
 \details{
 Writing R for the latent response indicator and D for the dropout indicator,
 the joint cell in which a patient would have responded but dropped out is
-p omega + rho sqrt(p (1 - p) omega (1 - omega)). Dividing by omega gives
+pi omega + rho sqrt(pi (1 - pi) omega (1 - omega)). Dividing by omega gives
 
-gamma = p + rho sqrt(p (1 - p) (1 - omega) / omega).
+gamma = pi + rho sqrt(pi (1 - pi) (1 - omega) / omega).
 
-Independence corresponds to gamma = p, a positive correlation to dropouts
+Independence corresponds to gamma = pi, a positive correlation to dropouts
 who respond more often than the group as a whole, and a negative correlation
 to dropouts who respond less often. The NRI estimand is
-(p1 - gamma1 omega1) - (p2 - gamma2 omega2), so gamma states directly the
+(pi1 - gamma1 omega1) - (pi0 - gamma0 omega0), so gamma states directly the
 quantity that non-responder imputation gets wrong: it counts every dropout as
 a non-responder, and gamma is the fraction of them for whom that is false.
 
@@ -43,8 +43,8 @@ No feasibility check is applied. Use \code{\link{gamma_bounds}} for the range
 that a bivariate Bernoulli distribution admits.
 }
 \examples{
-rho_to_gamma(p = 0.45, omega = 0.10, rho = 0)
-rho_to_gamma(p = 0.45, omega = 0.10, rho = c(-0.3, 0, 0.3))
+rho_to_gamma(pi = 0.45, omega = 0.10, rho = 0)
+rho_to_gamma(pi = 0.45, omega = 0.10, rho = c(-0.3, 0, 0.3))
 
 }
 \seealso{

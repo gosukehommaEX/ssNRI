@@ -31,13 +31,13 @@ attainable range of gamma there.
 \details{
 The bounds themselves are not plotted, because they are almost always 0 and
 1: gamma is an ordinary conditional probability and the Frechet-Prentice
-restriction binds only once the dropout probability exceeds p or 1 - p. What
+restriction binds only once the dropout probability exceeds pi or 1 - pi. What
 does vary, sharply, is the slope. At a small dropout probability a
 correlation of a few tenths already moves gamma across most of the unit
 interval, so an assumption that looks mild on the correlation scale is a
 strong statement about what the dropouts would have done.
 }
 \examples{
-plot(gamma_bounds(p = 0.45, omega = 0.10), n_points = 21)
+plot(gamma_bounds(pi = 0.45, omega = 0.10), n_points = 21)
 
 }

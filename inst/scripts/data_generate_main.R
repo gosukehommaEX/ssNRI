@@ -74,40 +74,40 @@ R_ALLOC <- 1
 # within-group independence between response and dropout
 # --------------------------------------------------------------------------- #
 FIG1_DELTA <- c(0.15, 0.25)
-FIG1_P1 <- c(0.35, 0.45, 0.55)
+FIG1_PI1 <- c(0.35, 0.45, 0.55)
 FIG1_OMEGA <- seq(0.05, 0.30, by = 0.05)
 
 fig1_grid <- expand.grid(
   delta_val = FIG1_DELTA,
-  p1_idx = seq_along(FIG1_P1),
+  pi1_idx = seq_along(FIG1_PI1),
   omega = FIG1_OMEGA,
   stringsAsFactors = FALSE
 )
 
 fig1_df <- timed("Figure 1 (CC validity)", {
   rows <- lapply(seq_len(nrow(fig1_grid)), function(k) {
-    p1_val <- FIG1_P1[fig1_grid$p1_idx[k]]
-    p2_val <- p1_val - fig1_grid$delta_val[k]
+    pi1_val <- FIG1_PI1[fig1_grid$pi1_idx[k]]
+    pi0_val <- pi1_val - fig1_grid$delta_val[k]
     omega <- fig1_grid$omega[k]
 
     ss <- sample_size_cc(
-      p1 = p1_val, p2 = p2_val,
-      omega1 = omega, omega2 = omega,
+      pi1 = pi1_val, pi0 = pi0_val,
+      omega1 = omega, omega0 = omega,
       r = R_ALLOC, alpha = ALPHA, target_power = TARGET_POWER
     )
     perf <- power_cc(
-      n1 = ss$n1_adjust, n2 = ss$n2_adjust,
-      p1 = p1_val, p2 = p2_val,
-      omega1 = omega, omega2 = omega,
-      rho1 = 0, rho2 = 0, alpha = ALPHA
+      n1 = ss$n1_adjust, n0 = ss$n0_adjust,
+      pi1 = pi1_val, pi0 = pi0_val,
+      omega1 = omega, omega0 = omega,
+      rho1 = 0, rho0 = 0, alpha = ALPHA
     )
     data.frame(
-      case = paste0("Case_", LETTERS[fig1_grid$p1_idx[k]], "_p1_", p1_val),
-      case_label = LETTERS[fig1_grid$p1_idx[k]],
-      p1_value = p1_val,
+      case = paste0("Case_", LETTERS[fig1_grid$pi1_idx[k]], "_p1_", pi1_val),
+      case_label = LETTERS[fig1_grid$pi1_idx[k]],
+      pi1_value = pi1_val,
       delta_val = fig1_grid$delta_val[k],
       omega = omega,
-      n_total = ss$n1_adjust + ss$n2_adjust,
+      n_total = ss$n1_adjust + ss$n0_adjust,
       power = perf$power,
       type1_error = perf$type1_error,
       stringsAsFactors = FALSE
@@ -120,7 +120,7 @@ saveRDS(
   list(
     df = fig1_df,
     delta = FIG1_DELTA,
-    p1 = FIG1_P1,
+    pi1 = FIG1_PI1,
     omega_values = FIG1_OMEGA,
     r = R_ALLOC,
     alpha = ALPHA,
@@ -134,28 +134,28 @@ saveRDS(
 # function of the response-dropout correlation
 # --------------------------------------------------------------------------- #
 FIG2_DELTA <- 0.15
-FIG2_P1 <- c(0.35, 0.45, 0.55)
+FIG2_PI1 <- c(0.35, 0.45, 0.55)
 FIG2_OMEGA <- c(0.05, 0.10, 0.20)
 FIG2_RHO_STEP <- 0.01
 
-# Correlation grid: the range feasible in both groups, per (p1, omega) cell
+# Correlation grid: the range feasible in both groups, per (pi1, omega) cell
 fig2_tasks <- list()
 k <- 1L
-for (i in seq_along(FIG2_P1)) {
-  p1_val <- FIG2_P1[i]
-  p2_val <- p1_val - FIG2_DELTA
+for (i in seq_along(FIG2_PI1)) {
+  pi1_val <- FIG2_PI1[i]
+  pi0_val <- pi1_val - FIG2_DELTA
   for (omega in FIG2_OMEGA) {
-    b1 <- rho_bounds(p = p1_val, omega = omega)
-    b2 <- rho_bounds(p = p2_val, omega = omega)
-    rho_min <- max(b1$rho_lower, b2$rho_lower)
-    rho_max <- min(b1$rho_upper, b2$rho_upper)
+    b1 <- rho_bounds(pi = pi1_val, omega = omega)
+    b0 <- rho_bounds(pi = pi0_val, omega = omega)
+    rho_min <- max(b1$rho_lower, b0$rho_lower)
+    rho_max <- min(b1$rho_upper, b0$rho_upper)
     if (rho_min > rho_max) {
       log_msg("No feasible correlation range for Case %s, omega = %.2f",
               LETTERS[i], omega)
       next
     }
     for (rho in seq(rho_min, rho_max, by = FIG2_RHO_STEP)) {
-      fig2_tasks[[k]] <- list(p1_idx = i, p1_val = p1_val, p2_val = p2_val,
+      fig2_tasks[[k]] <- list(pi1_idx = i, pi1_val = pi1_val, pi0_val = pi0_val,
                               omega = omega, rho = rho)
       k <- k + 1L
     }
@@ -166,43 +166,43 @@ log_msg("Figure 2 correlation grid: %d points", length(fig2_tasks))
 fig2_df <- timed("Figure 2 (NRI vs simple inflation)", {
   rows <- lapply(fig2_tasks, function(task) {
     ss_nri <- sample_size_nri(
-      p1 = task$p1_val, p2 = task$p2_val,
-      omega1 = task$omega, omega2 = task$omega,
-      rho1 = task$rho, rho2 = task$rho,
+      pi1 = task$pi1_val, pi0 = task$pi0_val,
+      omega1 = task$omega, omega0 = task$omega,
+      rho1 = task$rho, rho0 = task$rho,
       r = R_ALLOC, alpha = ALPHA, target_power = TARGET_POWER
     )
     ss_cc <- sample_size_cc(
-      p1 = task$p1_val, p2 = task$p2_val,
-      omega1 = task$omega, omega2 = task$omega,
+      pi1 = task$pi1_val, pi0 = task$pi0_val,
+      omega1 = task$omega, omega0 = task$omega,
       r = R_ALLOC, alpha = ALPHA, target_power = TARGET_POWER
     )
     N_proposed <- ss_nri$n_total
     N_simple <- ss_cc$n_total_adjust
 
     N1_proposed <- ceiling(N_proposed * R_ALLOC / (1 + R_ALLOC))
-    N2_proposed <- N_proposed - N1_proposed
+    N0_proposed <- N_proposed - N1_proposed
     N1_simple <- ceiling(N_simple * R_ALLOC / (1 + R_ALLOC))
-    N2_simple <- N_simple - N1_simple
+    N0_simple <- N_simple - N1_simple
 
     # Both sample sizes are evaluated under the NRI analysis, which is the
     # analysis the trial will actually run
     ep <- power_nri(
-      n1 = N1_proposed, n2 = N2_proposed,
-      p1 = task$p1_val, p2 = task$p2_val,
-      omega1 = task$omega, omega2 = task$omega,
-      rho1 = task$rho, rho2 = task$rho, alpha = ALPHA
+      n1 = N1_proposed, n0 = N0_proposed,
+      pi1 = task$pi1_val, pi0 = task$pi0_val,
+      omega1 = task$omega, omega0 = task$omega,
+      rho1 = task$rho, rho0 = task$rho, alpha = ALPHA
     )
     es <- power_nri(
-      n1 = N1_simple, n2 = N2_simple,
-      p1 = task$p1_val, p2 = task$p2_val,
-      omega1 = task$omega, omega2 = task$omega,
-      rho1 = task$rho, rho2 = task$rho, alpha = ALPHA
+      n1 = N1_simple, n0 = N0_simple,
+      pi1 = task$pi1_val, pi0 = task$pi0_val,
+      omega1 = task$omega, omega0 = task$omega,
+      rho1 = task$rho, rho0 = task$rho, alpha = ALPHA
     )
 
     data.frame(
       rho = task$rho,
-      case = paste0("Case_", LETTERS[task$p1_idx], "_p1_", task$p1_val),
-      p1_value = task$p1_val,
+      case = paste0("Case_", LETTERS[task$pi1_idx], "_p1_", task$pi1_val),
+      pi1_value = task$pi1_val,
       omega = task$omega,
       N_proposed = N_proposed,
       N_Simple = N_simple,
@@ -210,8 +210,8 @@ fig2_df <- timed("Figure 2 (NRI vs simple inflation)", {
       power_Simple = es$power,
       type1_proposed = ep$type1_error,
       type1_Simple = es$type1_error,
-      p1_NRI = ep$p1_NRI,
-      p2_NRI = ep$p2_NRI,
+      pi1_NRI = ep$pi1_NRI,
+      pi0_NRI = ep$pi0_NRI,
       effect_NRI = ep$effect_NRI,
       stringsAsFactors = FALSE
     )
@@ -223,7 +223,7 @@ saveRDS(
   list(
     df = fig2_df,
     delta = FIG2_DELTA,
-    p1 = FIG2_P1,
+    pi1 = FIG2_PI1,
     omega_values = FIG2_OMEGA,
     rho_step = FIG2_RHO_STEP,
     r = R_ALLOC,
@@ -234,16 +234,16 @@ saveRDS(
 )
 
 # --------------------------------------------------------------------------- #
-# Figure 3: relative efficiency over the (p1, omega) plane
+# Figure 3: relative efficiency over the (pi1, omega) plane
 # --------------------------------------------------------------------------- #
 FIG3_DELTA <- c(0.05, 0.10, 0.15, 0.20)
-FIG3_P1 <- seq(0.30, 0.90, by = 0.01)
+FIG3_PI1 <- seq(0.30, 0.90, by = 0.01)
 FIG3_OMEGA <- seq(0.05, 0.50, by = 0.01)
 FIG3_CONTOUR_STEP <- 0.1
 
 fig3_grid <- expand.grid(
   delta = FIG3_DELTA,
-  p1 = FIG3_P1,
+  pi1 = FIG3_PI1,
   omega = FIG3_OMEGA,
   stringsAsFactors = FALSE
 )
@@ -252,27 +252,27 @@ fig3_df <- timed("Figure 3 (relative efficiency)", {
   n_cc <- numeric(nrow(fig3_grid))
   n_nri <- numeric(nrow(fig3_grid))
   for (k in seq_len(nrow(fig3_grid))) {
-    p1_val <- fig3_grid$p1[k]
-    p2_val <- p1_val - fig3_grid$delta[k]
+    pi1_val <- fig3_grid$pi1[k]
+    pi0_val <- pi1_val - fig3_grid$delta[k]
     omega <- fig3_grid$omega[k]
     n_cc[k] <- sample_size_cc(
-      p1 = p1_val, p2 = p2_val, omega1 = omega, omega2 = omega,
+      pi1 = pi1_val, pi0 = pi0_val, omega1 = omega, omega0 = omega,
       r = R_ALLOC, alpha = ALPHA, target_power = TARGET_POWER
     )$n_total_adjust
     n_nri[k] <- sample_size_nri(
-      p1 = p1_val, p2 = p2_val, omega1 = omega, omega2 = omega,
-      rho1 = 0, rho2 = 0,
+      pi1 = pi1_val, pi0 = pi0_val, omega1 = omega, omega0 = omega,
+      rho1 = 0, rho0 = 0,
       r = R_ALLOC, alpha = ALPHA, target_power = TARGET_POWER
     )$n_total
   }
   data.frame(
     delta = fig3_grid$delta,
-    p1 = fig3_grid$p1,
+    pi1 = fig3_grid$pi1,
     omega = fig3_grid$omega,
     n_cc = n_cc,
     n_nri = n_nri,
     re = n_cc / n_nri,
-    delta_label = paste0("delta[Trad] == ", fig3_grid$delta),
+    delta_label = paste0("delta[Full] == ", fig3_grid$delta),
     stringsAsFactors = FALSE
   )
 })
@@ -281,7 +281,7 @@ saveRDS(
   list(
     df = fig3_df,
     delta = FIG3_DELTA,
-    p1_values = FIG3_P1,
+    pi1_values = FIG3_PI1,
     omega_values = FIG3_OMEGA,
     contour_step = FIG3_CONTOUR_STEP,
     r = R_ALLOC,
@@ -295,25 +295,25 @@ saveRDS(
 # Table 2: application to the cytisine smoking cessation trial
 #
 # Reduced to the design assumptions the original trial actually used. The wider
-# grid of p1 and omega values is now supplementary material. The NRI-scale
+# grid of pi1 and omega values is now supplementary material. The NRI-scale
 # response probabilities and effect are reported alongside the sample sizes, so
 # that the reader can see why the required sample size differs. Each correlation
 # is also reported as the probability of responding among dropouts, gamma, which
 # is what the design assumption amounts to in the two groups.
 # --------------------------------------------------------------------------- #
-APP_P1 <- 0.47
-APP_P2 <- 0.41
+APP_PI1 <- 0.47
+APP_PI0 <- 0.41
 APP_OMEGA <- 0.10
 APP_N_REPORTED <- 2388   # total enrolled under the simple inflation method
 
 table2_df <- timed("Table 2 (cytisine application)", {
-  b1 <- rho_bounds(p = APP_P1, omega = APP_OMEGA)
-  b2 <- rho_bounds(p = APP_P2, omega = APP_OMEGA)
-  rho_l <- max(b1$rho_lower, b2$rho_lower)
-  rho_u <- min(b1$rho_upper, b2$rho_upper)
+  b1 <- rho_bounds(pi = APP_PI1, omega = APP_OMEGA)
+  b0 <- rho_bounds(pi = APP_PI0, omega = APP_OMEGA)
+  rho_l <- max(b1$rho_lower, b0$rho_lower)
+  rho_u <- min(b1$rho_upper, b0$rho_upper)
 
   ss_cc <- sample_size_cc(
-    p1 = APP_P1, p2 = APP_P2, omega1 = APP_OMEGA, omega2 = APP_OMEGA,
+    pi1 = APP_PI1, pi0 = APP_PI0, omega1 = APP_OMEGA, omega0 = APP_OMEGA,
     r = R_ALLOC, alpha = ALPHA, target_power = TARGET_POWER
   )
   N_cc <- ss_cc$n_total_adjust
@@ -321,21 +321,21 @@ table2_df <- timed("Table 2 (cytisine application)", {
   rows <- lapply(seq_len(3), function(k) {
     rho_k <- c(rho_l, 0, rho_u)[k]
     ss_nri <- sample_size_nri(
-      p1 = APP_P1, p2 = APP_P2, omega1 = APP_OMEGA, omega2 = APP_OMEGA,
-      rho1 = rho_k, rho2 = rho_k,
+      pi1 = APP_PI1, pi0 = APP_PI0, omega1 = APP_OMEGA, omega0 = APP_OMEGA,
+      rho1 = rho_k, rho0 = rho_k,
       r = R_ALLOC, alpha = ALPHA, target_power = TARGET_POWER
     )
     data.frame(
-      p1 = APP_P1,
-      p2 = APP_P2,
+      pi1 = APP_PI1,
+      pi0 = APP_PI0,
       omega = APP_OMEGA,
       rho = rho_k,
       rho_label = c("L", "0", "U")[k],
-      gamma1 = rho_to_gamma(p = APP_P1, omega = APP_OMEGA, rho = rho_k),
-      gamma2 = rho_to_gamma(p = APP_P2, omega = APP_OMEGA, rho = rho_k),
-      p1_NRI = ss_nri$p1_NRI,
-      p2_NRI = ss_nri$p2_NRI,
-      effect_latent = ss_nri$effect_latent,
+      gamma1 = rho_to_gamma(pi = APP_PI1, omega = APP_OMEGA, rho = rho_k),
+      gamma0 = rho_to_gamma(pi = APP_PI0, omega = APP_OMEGA, rho = rho_k),
+      pi1_NRI = ss_nri$pi1_NRI,
+      pi0_NRI = ss_nri$pi0_NRI,
+      effect_full = ss_nri$effect_full,
       effect_NRI = ss_nri$effect_NRI,
       N_cc = N_cc,
       N_nri = ss_nri$n_total,
@@ -349,8 +349,8 @@ table2_df <- timed("Table 2 (cytisine application)", {
 saveRDS(
   list(
     df = table2_df,
-    p1 = APP_P1,
-    p2 = APP_P2,
+    pi1 = APP_PI1,
+    pi0 = APP_PI0,
     omega = APP_OMEGA,
     n_reported = APP_N_REPORTED,
     r = R_ALLOC,
@@ -386,41 +386,41 @@ if (table2_df$N_cc[1] != APP_N_REPORTED) {
 # that number_check.R can compare them with what the article states.
 # --------------------------------------------------------------------------- #
 APP_N1_ENROLLED <- 1239
-APP_N2_ENROLLED <- 1233
+APP_N0_ENROLLED <- 1233
 APP_N1_PLANNED  <- 1194
-APP_N2_PLANNED  <- 1194
+APP_N0_PLANNED  <- 1194
 
 # Reported results at six months, biochemically verified continuous abstinence
 APP_OBS <- list(
-  x1 = 401, x2 = 366,
-  rate1 = 0.324, rate2 = 0.297,
+  x1 = 401, x0 = 366,
+  rate1 = 0.324, rate0 = 0.297,
   risk_difference = 0.0268,
   ci_lower = -0.0096, ci_upper = 0.0633,
   relative_risk = 1.09, rr_lower = 0.97, rr_upper = 1.23,
   p_value = 0.114,
   # Patients with follow-up data available; the rest were counted as failures
-  n1_followed = 1142, n2_followed = 1130
+  n1_followed = 1142, n0_followed = 1130
 )
 APP_OBS$omega1_observed <- 1 - APP_OBS$n1_followed / APP_N1_ENROLLED
-APP_OBS$omega2_observed <- 1 - APP_OBS$n2_followed / APP_N2_ENROLLED
+APP_OBS$omega0_observed <- 1 - APP_OBS$n0_followed / APP_N0_ENROLLED
 
 application_power <- timed("Application (realized design power)", {
   sizes <- list(
-    planned  = c(APP_N1_PLANNED,  APP_N2_PLANNED),
-    enrolled = c(APP_N1_ENROLLED, APP_N2_ENROLLED),
+    planned  = c(APP_N1_PLANNED,  APP_N0_PLANNED),
+    enrolled = c(APP_N1_ENROLLED, APP_N0_ENROLLED),
     required = c(ceiling(table2_df$N_nri[table2_df$rho_label == "0"] / 2),
                  ceiling(table2_df$N_nri[table2_df$rho_label == "0"] / 2))
   )
   rows <- lapply(names(sizes), function(nm) {
     n <- sizes[[nm]]
     res <- power_nri(
-      n1 = n[1], n2 = n[2], p1 = APP_P1, p2 = APP_P2,
-      omega1 = APP_OMEGA, omega2 = APP_OMEGA,
-      rho1 = 0, rho2 = 0, alpha = ALPHA
+      n1 = n[1], n0 = n[2], pi1 = APP_PI1, pi0 = APP_PI0,
+      omega1 = APP_OMEGA, omega0 = APP_OMEGA,
+      rho1 = 0, rho0 = 0, alpha = ALPHA
     )
     data.frame(
-      scenario = nm, n1 = n[1], n2 = n[2], n_total = n[1] + n[2],
-      p1_NRI = res$p1_NRI, p2_NRI = res$p2_NRI,
+      scenario = nm, n1 = n[1], n0 = n[2], n_total = n[1] + n[2],
+      pi1_NRI = res$pi1_NRI, pi0_NRI = res$pi0_NRI,
       effect_NRI = res$effect_NRI, power = res$power,
       stringsAsFactors = FALSE
     )
@@ -430,9 +430,9 @@ application_power <- timed("Application (realized design power)", {
 
 saveRDS(
   list(power = application_power, observed = APP_OBS,
-       p1 = APP_P1, p2 = APP_P2, omega = APP_OMEGA,
-       n_planned = APP_N1_PLANNED + APP_N2_PLANNED,
-       n_enrolled = APP_N1_ENROLLED + APP_N2_ENROLLED,
+       pi1 = APP_PI1, pi0 = APP_PI0, omega = APP_OMEGA,
+       n_planned = APP_N1_PLANNED + APP_N0_PLANNED,
+       n_enrolled = APP_N1_ENROLLED + APP_N0_ENROLLED,
        alpha = ALPHA, target_power = TARGET_POWER),
   file.path(data_dir, "application_data.rds")
 )

@@ -28,8 +28,8 @@ with the remaining inputs held at the values stored in the object. A dashed
 vertical line marks the value the object itself was evaluated at.
 }
 \examples{
-res <- power_nri(n1 = 40, n2 = 40, p1 = 0.6, p2 = 0.4,
-                 omega1 = 0.2, omega2 = 0.2)
+res <- power_nri(n1 = 40, n0 = 40, pi1 = 0.6, pi0 = 0.4,
+                 omega1 = 0.2, omega0 = 0.2)
 plot(res, vary = "rho", n_points = 11)
 
 }

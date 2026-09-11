@@ -6,40 +6,40 @@
 \usage{
 power_nri(
   n1,
-  n2,
-  p1,
-  p2,
+  n0,
+  pi1,
+  pi0,
   omega1,
-  omega2,
+  omega0,
   rho1 = 0,
-  rho2 = 0,
+  rho0 = 0,
   alpha = 0.025,
-  p_null = NULL
+  pi_null = NULL
 )
 }
 \arguments{
 \item{n1}{Integer. Randomized sample size for group 1 (treatment), n1 > 0.}
 
-\item{n2}{Integer. Randomized sample size for group 2 (control), n2 > 0.}
+\item{n0}{Integer. Randomized sample size for group 0 (control), n0 > 0.}
 
-\item{p1}{Numeric. Latent response probability for group 1, 0 < p1 < 1.}
+\item{pi1}{Numeric. Latent response probability for group 1, 0 < pi1 < 1.}
 
-\item{p2}{Numeric. Latent response probability for group 2, 0 < p2 < 1.}
+\item{pi0}{Numeric. Latent response probability for group 0, 0 < pi0 < 1.}
 
 \item{omega1}{Numeric. Dropout probability for group 1, 0 <= omega1 < 1.}
 
-\item{omega2}{Numeric. Dropout probability for group 2, 0 <= omega2 < 1.}
+\item{omega0}{Numeric. Dropout probability for group 0, 0 <= omega0 < 1.}
 
 \item{rho1}{Numeric. Correlation between the latent response and the dropout
 indicator in group 1 (default = 0).}
 
-\item{rho2}{Numeric. Correlation between the latent response and the dropout
-indicator in group 2 (default = 0).}
+\item{rho0}{Numeric. Correlation between the latent response and the dropout
+indicator in group 0 (default = 0).}
 
 \item{alpha}{Numeric. One-sided significance level, 0 < alpha < 1
 (default = 0.025).}
 
-\item{p_null}{Numeric or NULL. Common response probability under the null
+\item{pi_null}{Numeric or NULL. Common response probability under the null
 hypothesis, used only for the type I error rate. The default NULL uses the
 sample-size weighted average of the two NRI response probabilities. Supply
 a value to evaluate the size of the test at a different nuisance parameter.}
@@ -48,10 +48,10 @@ a value to evaluate the size of the test at a different nuisance parameter.}
 A \code{data.frame} of class \code{power_nri} with one row containing
 the inputs together with:
 \describe{
-\item{p1_NRI}{Observed response probability in group 1 under NRI}
-\item{p2_NRI}{Observed response probability in group 2 under NRI}
-\item{effect_latent}{Latent treatment effect, p1 - p2}
-\item{effect_NRI}{NRI treatment effect, p1_NRI - p2_NRI}
+\item{pi1_NRI}{Observed response probability in group 1 under NRI}
+\item{pi0_NRI}{Observed response probability in group 0 under NRI}
+\item{effect_full}{Full-data treatment effect, pi1 - pi0}
+\item{effect_NRI}{NRI treatment effect, pi1_NRI - pi0_NRI}
 \item{power}{Exact power}
 \item{type1_error}{Exact type I error rate}
 }
@@ -64,30 +64,30 @@ in which every dropout is counted as a non-responder.
 \details{
 Under NRI a patient counts as a responder only when the latent response
 equals one and the patient completes the trial, so the number of observed
-responders in group j follows a binomial distribution with size nj and
+responders in group j follows a binomial distribution with size n_j and
 success probability
 
-pj_NRI = P(R = 1, D = 0)
-= pj (1 - omegaj) - rhoj sqrt(pj (1 - pj) omegaj (1 - omegaj)).
+pi_j_NRI = P(R_ij = 1, D_ij = 0)
+= pi_j (1 - omega_j) - rho_j sqrt(pi_j (1 - pi_j) omega_j (1 - omega_j)).
 
 The randomized sample size is fixed, so no completer-count stage is involved
 and the evaluation is a single enumeration over the observed responder pair.
 As in \code{\link{power_cc}}, the rejection region is an upper set in the
-group 1 count for every fixed group 2 count, so the enumeration reduces to
-upper binomial tail probabilities evaluated at one threshold per group 2
+group 1 count for every fixed group 0 count, so the enumeration reduces to
+upper binomial tail probabilities evaluated at one threshold per group 0
 count. This is exact; nothing is discarded.
 
 The type I error rate is evaluated at a common response probability, which by
 default is the sample-size weighted average
-p0 = (n1 p1_NRI + n2 p2_NRI) / (n1 + n2). That choice is a convention rather
+pi_bar = (n1 pi1_NRI + n0 pi0_NRI) / (n1 + n0). That choice is a convention rather
 than a property of the test: the size of a two-sample binomial test depends on
-the nuisance parameter, and \code{p_null} exists so that the dependence can be
-examined. The returned \code{p_null} column records the value used.
+the nuisance parameter, and \code{pi_null} exists so that the dependence can be
+examined. The returned \code{pi_null} column records the value used.
 
 The NRI estimand differs from the complete case estimand. Writing
-sj = sqrt(pj (1 - pj) omegaj (1 - omegaj)),
+s_j = sqrt(pi_j (1 - pi_j) omega_j (1 - omega_j)),
 
-delta_NRI = p1 (1 - omega1) - p2 (1 - omega2) - rho1 s1 + rho2 s2,
+delta_NRI = pi1 (1 - omega1) - pi0 (1 - omega0) - rho1 s1 + rho0 s0,
 
 which reduces to (1 - omega) delta_CC when the two groups share a dropout
 probability and the latent response is independent of dropout within each
@@ -97,13 +97,13 @@ inflated type I error rate but a correctly sized test of a different null
 hypothesis.
 }
 \examples{
-power_nri(n1 = 60, n2 = 60, p1 = 0.6, p2 = 0.4,
-          omega1 = 0.2, omega2 = 0.2, rho1 = 0, rho2 = 0)
+power_nri(n1 = 60, n0 = 60, pi1 = 0.6, pi0 = 0.4,
+          omega1 = 0.2, omega0 = 0.2, rho1 = 0, rho0 = 0)
 
 # Unequal dropout probabilities move the NRI estimand away from zero
 # even when the latent response probabilities are equal
-power_nri(n1 = 60, n2 = 60, p1 = 0.4, p2 = 0.4,
-          omega1 = 0.05, omega2 = 0.20)
+power_nri(n1 = 60, n0 = 60, pi1 = 0.4, pi0 = 0.4,
+          omega1 = 0.05, omega0 = 0.20)
 
 }
 \seealso{

@@ -1,16 +1,16 @@
 # Internal helpers shared by the exact evaluation and plotting functions.
 
-#' Smallest group 1 count that rejects, for every group 2 count
+#' Smallest group 1 count that rejects, for every group 0 count
 #'
-#' For fixed group sizes m1 and m2 and a fixed group 2 count x2, the one-sided
+#' For fixed group sizes m1 and m0 and a fixed group 0 count x0, the one-sided
 #' pooled-variance Z statistic is strictly increasing in the group 1 count x1
 #' wherever it is positive. Writing the statistic as
-#' \code{(x1 - x2 m1 / m2) / sqrt((x1 + x2)(M - x1 - x2))} up to a positive
-#' factor, with \code{M = m1 + m2}, the derivative of its logarithm is
-#' \code{1 / (x1 - x2 m1 / m2) - (1 / 2)(1 / (x1 + x2) - 1 / (M - x1 - x2))},
-#' and the first term dominates because \code{x1 - x2 m1 / m2 < x1 + x2}.
+#' \code{(x1 - x0 m1 / m0) / sqrt((x1 + x0)(M - x1 - x0))} up to a positive
+#' factor, with \code{M = m1 + m0}, the derivative of its logarithm is
+#' \code{1 / (x1 - x0 m1 / m0) - (1 / 2)(1 / (x1 + x0) - 1 / (M - x1 - x0))},
+#' and the first term dominates because \code{x1 - x0 m1 / m0 < x1 + x0}.
 #' Rejection requires a positive statistic, so the rejection region is an upper
-#' set in x1 and is described by a single threshold for each x2.
+#' set in x1 and is described by a single threshold for each x0.
 #'
 #' The threshold is obtained as the larger root of the quadratic inequality
 #' equivalent to \code{Z > z_alpha} and is then verified against the defining
@@ -21,44 +21,44 @@
 #' 32-bit integer type from group sizes of about 64 upwards.
 #'
 #' @param m1 Numeric scalar. Group 1 size, m1 >= 1.
-#' @param m2 Numeric scalar. Group 2 size, m2 >= 1.
+#' @param m0 Numeric scalar. Group 0 size, m0 >= 1.
 #' @param z_alpha Numeric scalar. Critical value of the one-sided test.
 #'
-#' @return A numeric vector of length \code{m2 + 1}. Element \code{j + 1} is the
-#'   smallest x1 for which the test rejects when x2 equals j, or \code{m1 + 1}
+#' @return A numeric vector of length \code{m0 + 1}. Element \code{j + 1} is the
+#'   smallest x1 for which the test rejects when x0 equals j, or \code{m1 + 1}
 #'   when no x1 rejects.
 #'
 #' @noRd
-.reject_threshold <- function(m1, m2, z_alpha) {
+.reject_threshold <- function(m1, m0, z_alpha) {
 
   m1 <- as.numeric(m1)
-  m2 <- as.numeric(m2)
-  M <- m1 + m2
-  inv <- 1 / m1 + 1 / m2
-  x2 <- as.numeric(0:m2)
+  m0 <- as.numeric(m0)
+  M <- m1 + m0
+  inv <- 1 / m1 + 1 / m0
+  x0 <- as.numeric(0:m0)
   z2 <- z_alpha * z_alpha
 
   # Quadratic form of Z > z_alpha in x1. The leading coefficient is positive,
   # so the rejection region is the upper branch beyond the larger root
-  qa <- M * m2 * m2 + z2 * m1 * m2
-  qb <- -2 * x2 * M * m1 * m2 - z2 * m1 * m2 * (M - 2 * x2)
-  qc <- M * x2 * x2 * m1 * m1 - z2 * m1 * m2 * x2 * (M - x2)
+  qa <- M * m0 * m0 + z2 * m1 * m0
+  qb <- -2 * x0 * M * m1 * m0 - z2 * m1 * m0 * (M - 2 * x0)
+  qc <- M * x0 * x0 * m1 * m1 - z2 * m1 * m0 * x0 * (M - x0)
   disc <- qb * qb - 4 * qa * qc
   root <- ifelse(disc < 0, -qb / (2 * qa),
                  (-qb + sqrt(pmax(disc, 0))) / (2 * qa))
 
   cth <- pmax(ceiling(root - 1e-9), 0)
-  cth <- pmax(cth, floor(x2 * m1 / m2))
+  cth <- pmax(cth, floor(x0 * m1 / m0))
 
   # Verify against the defining inequality. The root is accurate to well within
   # one unit, so this settles in a single step, but it is kept so that the
   # thresholds are exact by construction rather than by numerical luck
   z_at <- function(u) {
     u <- pmin(pmax(u, 0), m1)
-    pp <- (u + x2) / M
+    pp <- (u + x0) / M
     se <- sqrt(pp * (1 - pp) * inv)
     se[se < 1e-10] <- 1e-10
-    (u / m1 - x2 / m2) / se
+    (u / m1 - x0 / m0) / se
   }
   repeat {
     move <- (cth <= m1) & (z_at(cth) <= z_alpha)
@@ -77,7 +77,7 @@
 
 #' Bivariate Bernoulli joint cell probabilities
 #'
-#' @param p Numeric. Marginal probability that the latent response equals one.
+#' @param pi Numeric. Marginal probability that the latent response equals one.
 #' @param omega Numeric. Marginal dropout probability.
 #' @param rho Numeric. Correlation between the two indicators.
 #'
@@ -85,13 +85,13 @@
 #'   \code{pi_00} and \code{pi_01}, clamped to the unit interval.
 #'
 #' @noRd
-.joint_cells <- function(p, omega, rho) {
-  s <- sqrt(p * (1 - p) * omega * (1 - omega))
+.joint_cells <- function(pi, omega, rho) {
+  s <- sqrt(pi * (1 - pi) * omega * (1 - omega))
   cells <- c(
-    pi_10 = p * (1 - omega) - rho * s,
-    pi_11 = p * omega + rho * s,
-    pi_00 = (1 - p) * (1 - omega) + rho * s,
-    pi_01 = (1 - p) * omega - rho * s
+    pi_10 = pi * (1 - omega) - rho * s,
+    pi_11 = pi * omega + rho * s,
+    pi_00 = (1 - pi) * (1 - omega) + rho * s,
+    pi_01 = (1 - pi) * omega - rho * s
   )
   # Clamp away tiny negative values at the edge of the feasible region. pmax()
   # and pmin() copy attributes from their FIRST argument, so cells has to come
@@ -104,30 +104,30 @@
 
 #' Correlation range feasible in both groups simultaneously
 #'
-#' @param p1,p2 Numeric. Latent response probabilities.
-#' @param omega1,omega2 Numeric. Dropout probabilities.
+#' @param pi1,pi0 Numeric. Latent response probabilities.
+#' @param omega1,omega0 Numeric. Dropout probabilities.
 #'
 #' @return A numeric vector of length two, the intersection of the two feasible
 #'   ranges.
 #'
 #' @noRd
-.common_rho_range <- function(p1, p2, omega1, omega2) {
-  b1 <- rho_bounds(p = p1, omega = omega1)
-  b2 <- rho_bounds(p = p2, omega = omega2)
-  c(max(b1$rho_lower, b2$rho_lower), min(b1$rho_upper, b2$rho_upper))
+.common_rho_range <- function(pi1, pi0, omega1, omega0) {
+  b1 <- rho_bounds(pi = pi1, omega = omega1)
+  b0 <- rho_bounds(pi = pi0, omega = omega0)
+  c(max(b1$rho_lower, b0$rho_lower), min(b1$rho_upper, b0$rho_upper))
 }
 
 #' Move a correlation into its feasible range
 #'
 #' @param rho Numeric. Correlation to clamp.
-#' @param p Numeric. Latent response probability.
+#' @param pi Numeric. Latent response probability.
 #' @param omega Numeric. Dropout probability.
 #'
 #' @return The clamped correlation.
 #'
 #' @noRd
-.clamp_rho <- function(rho, p, omega) {
-  b <- rho_bounds(p = p, omega = omega)
+.clamp_rho <- function(rho, pi, omega) {
+  b <- rho_bounds(pi = pi, omega = omega)
   min(max(rho, b$rho_lower), b$rho_upper)
 }
 
@@ -163,33 +163,39 @@
   if (n_points < 3) stop("n_points must be at least 3")
 
   if (vary == "rho") {
-    rng <- .common_rho_range(x$p1, x$p2, x$omega1, x$omega2)
+    rng <- .common_rho_range(x$pi1, x$pi0, x$omega1, x$omega0)
     if (!is.finite(rng[1]) || !is.finite(rng[2]) || rng[2] - rng[1] < 1e-8) {
       stop("The correlation range feasible in both groups is a single point; ",
            "use vary = \"omega\" instead", call. = FALSE)
     }
     grid <- seq(rng[1], rng[2], length.out = n_points)
     res <- lapply(grid, function(g) {
-      fun(n1 = x$n1, n2 = x$n2, p1 = x$p1, p2 = x$p2,
-          omega1 = x$omega1, omega2 = x$omega2,
-          rho1 = g, rho2 = g, alpha = x$alpha)
+      fun(n1 = x$n1, n0 = x$n0, pi1 = x$pi1, pi0 = x$pi0,
+          omega1 = x$omega1, omega0 = x$omega0,
+          rho1 = g, rho0 = g, alpha = x$alpha)
     })
     x_lab <- expression(rho)
-    marker <- if (isTRUE(all.equal(x$rho1, x$rho2))) x$rho1 else NA_real_
-    sub <- sprintf("omega = (%.2f, %.2f)", x$omega1, x$omega2)
+    marker <- if (isTRUE(all.equal(x$rho1, x$rho0))) x$rho1 else NA_real_
+    sub <- parse(text = sprintf(
+      'paste("(", omega[1], ", ", omega[0], ") = (%.2f, %.2f)")',
+      x$omega1, x$omega0
+    ))
   } else {
     grid <- seq(0.01, 0.50, length.out = n_points)
     res <- lapply(grid, function(g) {
-      fun(n1 = x$n1, n2 = x$n2, p1 = x$p1, p2 = x$p2,
-          omega1 = g, omega2 = g,
-          rho1 = .clamp_rho(x$rho1, x$p1, g),
-          rho2 = .clamp_rho(x$rho2, x$p2, g),
+      fun(n1 = x$n1, n0 = x$n0, pi1 = x$pi1, pi0 = x$pi0,
+          omega1 = g, omega0 = g,
+          rho1 = .clamp_rho(x$rho1, x$pi1, g),
+          rho0 = .clamp_rho(x$rho0, x$pi0, g),
           alpha = x$alpha)
     })
     x_lab <- expression(omega)
-    marker <- if (isTRUE(all.equal(x$omega1, x$omega2))) x$omega1 else NA_real_
-    sub <- sprintf("rho = (%.2f, %.2f), moved into the feasible range where needed",
-                   x$rho1, x$rho2)
+    marker <- if (isTRUE(all.equal(x$omega1, x$omega0))) x$omega1 else NA_real_
+    sub <- parse(text = sprintf(
+      paste0('paste("(", rho[1], ", ", rho[0], ") = (%.2f, %.2f), ',
+             'moved into the feasible range where needed")'),
+      x$rho1, x$rho0
+    ))
   }
 
   dat <- data.frame(
@@ -208,8 +214,11 @@
     ggplot2::facet_wrap(ggplot2::vars(.data$quantity), scales = "free_y") +
     ggplot2::labs(
       x = x_lab, y = NULL,
-      title = sprintf("%s, n = (%d, %d), p = (%.2f, %.2f)",
-                      label, x$n1, x$n2, x$p1, x$p2),
+      title = parse(text = sprintf(
+        paste0('paste("%s, (", n[1], ", ", n[0], ") = (%d, %d), ',
+               '(", pi[1], ", ", pi[0], ") = (%.2f, %.2f)")'),
+        label, x$n1, x$n0, x$pi1, x$pi0
+      )),
       subtitle = sub
     ) +
     ggplot2::theme_bw(base_size = 12)

@@ -30,7 +30,7 @@ the two curves is the shortfall the simple inflation method incurs. A dashed
 vertical line marks the value the object itself was evaluated at.
 }
 \examples{
-ss <- sample_size_nri(p1 = 0.6, p2 = 0.4, omega1 = 0.2, omega2 = 0.2)
+ss <- sample_size_nri(pi1 = 0.6, pi0 = 0.4, omega1 = 0.2, omega0 = 0.2)
 plot(ss, vary = "omega", n_points = 11)
 
 }

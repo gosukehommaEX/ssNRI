@@ -1,11 +1,11 @@
 \begin{table}[htbp]
   \centering
-  \caption{Exact power of a complete case analysis when the two dropout probabilities differ and each group is inflated by its own dropout probability. Design parameters: $p_{1} = 0.45$, $p_{2} = 0.30$, $\rho_{1} = \rho_{2} = 0$, $r = 1$, $\alpha = 0.025$ (one-sided) and target power $= 0.8$. The target power is attained throughout, so equal dropout probabilities are not necessary for the simple inflation method to be valid.}
+  \caption{Exact power of a complete case analysis when the two dropout probabilities differ and each group is inflated by its own dropout probability. Design parameters: $\pi_{1} = 0.45$, $\pi_{0} = 0.30$, $\rho_{1} = \rho_{0} = 0$, $r = 1$, $\alpha = 0.025$ (one-sided) and target power $= 0.8$. The target power is attained throughout, so equal dropout probabilities are not necessary for the simple inflation method to be valid.}
   \label{tab:unequal-dropout}
   \begin{threeparttable}
   \begin{tabular}{ccrrrrr}
     \toprule
-    $\omega_{1}$ & $\omega_{2}$ & $n_{\mathrm{complete}}$ & $n_{1}$ & $n_{2}$ & Power & Type I error \\
+    $\omega_{1}$ & $\omega_{0}$ & $n_{\mathrm{complete}}$ & $n_{1}$ & $n_{0}$ & Power & Type I error \\
     \midrule
     0.10 & 0.10 & 163 & 182 & 182 & 0.8048 & 0.0251 \\
     0.05 & 0.20 & 163 & 172 & 204 & 0.8035 & 0.0253 \\

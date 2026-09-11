@@ -26,6 +26,6 @@ A dashed vertical line marks the dropout probability the object itself was
 evaluated at.
 }
 \examples{
-plot(rho_bounds(p = 0.35, omega = 0.10), n_points = 21)
+plot(rho_bounds(pi = 0.35, omega = 0.10), n_points = 21)
 
 }

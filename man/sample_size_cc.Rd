@@ -5,27 +5,27 @@
 \title{Sample Size under the Simple Inflation Method}
 \usage{
 sample_size_cc(
-  p1,
-  p2,
+  pi1,
+  pi0,
   omega1 = 0,
-  omega2 = 0,
+  omega0 = 0,
   r = 1,
   alpha = 0.025,
   target_power = 0.8
 )
 }
 \arguments{
-\item{p1}{Numeric. Latent response probability for group 1, 0 < p1 < 1.}
+\item{pi1}{Numeric. Latent response probability for group 1, 0 < pi1 < 1.}
 
-\item{p2}{Numeric. Latent response probability for group 2, 0 < p2 < 1.}
+\item{pi0}{Numeric. Latent response probability for group 0, 0 < pi0 < 1.}
 
 \item{omega1}{Numeric. Dropout probability for group 1, 0 <= omega1 < 1
 (default = 0).}
 
-\item{omega2}{Numeric. Dropout probability for group 2, 0 <= omega2 < 1
+\item{omega0}{Numeric. Dropout probability for group 0, 0 <= omega0 < 1
 (default = 0).}
 
-\item{r}{Numeric. Allocation ratio n1 / n2, r > 0 (default = 1).}
+\item{r}{Numeric. Allocation ratio n1 / n0, r > 0 (default = 1).}
 
 \item{alpha}{Numeric. One-sided significance level (default = 0.025).}
 
@@ -35,9 +35,9 @@ sample_size_cc(
 A \code{data.frame} of class \code{sample_size_cc} with one row
 containing the inputs together with:
 \describe{
-\item{n1, n2, n_total}{Sample size for the design without dropout}
-\item{n1_adjust, n2_adjust, n_total_adjust}{Sample size after the
-nj / (1 - omegaj) inflation}
+\item{n1, n0, n_total}{Sample size for the design without dropout}
+\item{n1_adjust, n0_adjust, n_total_adjust}{Sample size after the
+n_j / (1 - omega_j) inflation}
 }
 }
 \description{
@@ -60,10 +60,10 @@ where a dropout is counted as a non-responder, and it is that mismatch that
 }
 \examples{
 # Design without dropout
-sample_size_cc(p1 = 0.6, p2 = 0.4)
+sample_size_cc(pi1 = 0.6, pi0 = 0.4)
 
 # With 20 percent dropout in both groups
-sample_size_cc(p1 = 0.6, p2 = 0.4, omega1 = 0.2, omega2 = 0.2)
+sample_size_cc(pi1 = 0.6, pi0 = 0.4, omega1 = 0.2, omega0 = 0.2)
 
 }
 \seealso{

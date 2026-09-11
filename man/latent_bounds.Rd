@@ -5,7 +5,7 @@
 \title{Identified Range for the Latent Response Probability}
 \usage{
 latent_bounds(
-  p_obs,
+  pi_obs,
   N_randomized,
   N_dropout,
   method = c("nri", "cc", "bc", "wc"),
@@ -13,8 +13,8 @@ latent_bounds(
 )
 }
 \arguments{
-\item{p_obs}{Numeric. Response probability as reported by the historical
-trial, on the scale implied by \code{method}, 0 <= p_obs <= 1.}
+\item{pi_obs}{Numeric. Response probability as reported by the historical
+trial, on the scale implied by \code{method}, 0 <= pi_obs <= 1.}
 
 \item{N_randomized}{Integer. Number of patients randomized in that group.}
 
@@ -31,8 +31,8 @@ best and worst case rules, which are asymmetric across groups.}
 }
 \value{
 A \code{data.frame} of class \code{latent_bounds} with one row
-containing the inputs together with \code{omega}, \code{p_nri},
-\code{p_lower}, \code{p_upper} and \code{p_midpoint}.
+containing the inputs together with \code{omega}, \code{pi_nri},
+\code{pi_lower}, \code{pi_upper} and \code{pi_midpoint}.
 }
 \description{
 Given a response rate reported by a historical trial under a stated
@@ -49,27 +49,27 @@ recovered.
 
 Every rule is first placed on the NRI scale, that is on the joint probability
 of responding and completing. Counting dropouts as non-responders reports
-that joint probability directly, so p_NRI = p_obs; this is what NRI does in
+that joint probability directly, so pi_NRI = pi_obs; this is what NRI does in
 both groups, what a best case analysis does in the control group and what a
 worst case analysis does in the treatment group. Counting dropouts as
-responders adds the whole dropout probability, so p_NRI = p_obs - omega; this
+responders adds the whole dropout probability, so pi_NRI = pi_obs - omega; this
 is what a best case analysis does in the treatment group and a worst case
 analysis in the control group. A complete case analysis reports the rate
-conditional on completing, so p_NRI = p_obs (1 - omega). Each conversion is an
+conditional on completing, so pi_NRI = pi_obs (1 - omega). Each conversion is an
 identity and requires no assumption about the missingness mechanism.
 
-The latent probability then lies between p_NRI, attained when no dropout
-would have responded, and p_NRI + omega, attained when every dropout would
+The latent probability then lies between pi_NRI, attained when no dropout
+would have responded, and pi_NRI + omega, attained when every dropout would
 have responded:
 
-p_lower = p_NRI,   p_upper = p_NRI + omega.
+pi_lower = pi_NRI,   pi_upper = pi_NRI + omega.
 
 The width of the interval is exactly omega, so a historical trial with little
 dropout pins the latent probability down tightly and one with heavy dropout
 barely constrains it. Setting a joint cell to zero, as is sometimes done to
 read a latent probability off a best or worst case rate, selects one endpoint
 of this interval rather than identifying a point: the value that a best case
-treatment rate is often taken to give is p_upper, and it carries the
+treatment rate is often taken to give is pi_upper, and it carries the
 assumption that every dropout in that group would have responded.
 
 Planning should carry the interval rather than a single recovered value: pass
@@ -83,14 +83,14 @@ not the one actually applied. A warning is issued and the bound is truncated.
 }
 \examples{
 # A historical trial reporting 40 percent under NRI, with 15 percent dropout
-latent_bounds(p_obs = 0.40, N_randomized = 200, N_dropout = 30)
+latent_bounds(pi_obs = 0.40, N_randomized = 200, N_dropout = 30)
 
 # The same trial reported on the complete case scale
-latent_bounds(p_obs = 0.47, N_randomized = 200, N_dropout = 30,
+latent_bounds(pi_obs = 0.47, N_randomized = 200, N_dropout = 30,
               method = "cc")
 
 # A best case rate in the treatment group counts dropouts as responders
-latent_bounds(p_obs = 0.55, N_randomized = 200, N_dropout = 30,
+latent_bounds(pi_obs = 0.55, N_randomized = 200, N_dropout = 30,
               method = "bc", group = "treatment")
 
 }

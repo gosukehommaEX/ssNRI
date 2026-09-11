@@ -6,44 +6,44 @@
 \usage{
 power_cc(
   n1,
-  n2,
-  p1,
-  p2,
+  n0,
+  pi1,
+  pi0,
   omega1,
-  omega2,
+  omega0,
   rho1 = 0,
-  rho2 = 0,
+  rho0 = 0,
   alpha = 0.025,
-  p_null = NULL,
+  pi_null = NULL,
   tol = 0
 )
 }
 \arguments{
 \item{n1}{Integer. Randomized sample size for group 1 (treatment), n1 > 0.}
 
-\item{n2}{Integer. Randomized sample size for group 2 (control), n2 > 0.}
+\item{n0}{Integer. Randomized sample size for group 0 (control), n0 > 0.}
 
-\item{p1}{Numeric. Latent response probability for group 1, 0 < p1 < 1.}
+\item{pi1}{Numeric. Latent response probability for group 1, 0 < pi1 < 1.}
 
-\item{p2}{Numeric. Latent response probability for group 2, 0 < p2 < 1.}
+\item{pi0}{Numeric. Latent response probability for group 0, 0 < pi0 < 1.}
 
 \item{omega1}{Numeric. Dropout probability for group 1, 0 <= omega1 < 1.}
 
-\item{omega2}{Numeric. Dropout probability for group 2, 0 <= omega2 < 1.}
+\item{omega0}{Numeric. Dropout probability for group 0, 0 <= omega0 < 1.}
 
 \item{rho1}{Numeric. Correlation between the latent response and the dropout
 indicator in group 1 (default = 0). Must lie within the feasible range
 returned by \code{rho_bounds}.}
 
-\item{rho2}{Numeric. Correlation between the latent response and the dropout
-indicator in group 2 (default = 0).}
+\item{rho0}{Numeric. Correlation between the latent response and the dropout
+indicator in group 0 (default = 0).}
 
 \item{alpha}{Numeric. One-sided significance level, 0 < alpha < 1
 (default = 0.025).}
 
-\item{p_null}{Numeric or NULL. Common conditional response probability among
+\item{pi_null}{Numeric or NULL. Common conditional response probability among
 completers under the null hypothesis, used only for the type I error rate.
-The default NULL uses the sample-size weighted average of p1_CC and p2_CC.
+The default NULL uses the sample-size weighted average of pi1_CC and pi0_CC.
 Supply a value to evaluate the size of the test at a different nuisance
 parameter. The pooled dropout probability used for the completer stage is
 unaffected.}
@@ -58,10 +58,10 @@ at most tol under both hypotheses; see Details for the resulting error bound.}
 A \code{data.frame} of class \code{power_cc} with one row containing
 the inputs together with:
 \describe{
-\item{p1_CC}{Conditional response probability among completers in group 1}
-\item{p2_CC}{Conditional response probability among completers in group 2}
-\item{effect_latent}{Latent treatment effect, p1 - p2}
-\item{effect_CC}{Complete case treatment effect, p1_CC - p2_CC}
+\item{pi1_CC}{Conditional response probability among completers in group 1}
+\item{pi0_CC}{Conditional response probability among completers in group 0}
+\item{effect_full}{Full-data treatment effect, pi1 - pi0}
+\item{effect_CC}{Complete case treatment effect, pi1_CC - pi0_CC}
 \item{power}{Exact power}
 \item{type1_error}{Exact type I error rate}
 }
@@ -73,34 +73,34 @@ for the randomness of both the number of completers and the number of
 responders among completers.
 }
 \details{
-Let M1 and M2 denote the numbers of completers and X1 and X2 the numbers of
+Let M1 and M0 denote the numbers of completers and X1 and X0 the numbers of
 responders among completers. Under the bivariate Bernoulli model,
-Mj follows a binomial distribution with size nj and success probability
-1 - omegaj, and, conditionally on Mj = mj, Xj follows a binomial distribution
-with size mj and success probability
+M_j follows a binomial distribution with size n_j and success probability
+1 - omega_j, and, conditionally on M_j = m_j, X_j follows a binomial distribution
+with size m_j and success probability
 
-pj_CC = P(R = 1 | D = 0)
-= (pj (1 - omegaj) - rhoj sqrt(pj (1 - pj) omegaj (1 - omegaj)))
-/ (1 - omegaj).
+pi_j_CC = P(R_ij = 1 | D_ij = 0)
+= (pi_j (1 - omega_j) - rho_j sqrt(pi_j (1 - pi_j) omega_j (1 - omega_j)))
+/ (1 - omega_j).
 
-Under within-group independence (rhoj = 0) this reduces to pj_CC = pj, which
+Under within-group independence (rho_j = 0) this reduces to pi_j_CC = pi_j, which
 is what justifies the simple inflation method implemented in
 \code{sample_size_cc}.
 
 Exact evaluation therefore requires the sum
 
-sum over (m1, m2) of P(M1 = m1) P(M2 = m2) times the conditional rejection
-probability given (m1, m2),
+sum over (m1, m0) of P(M1 = m1) P(M0 = m0) times the conditional rejection
+probability given (m1, m0),
 
 with completer counts of zero excluded because the test statistic is then
 undefined.
 
-Rather than enumerating every responder pair (x1, x2) within each (m1, m2)
-cell, this implementation uses the following property. For fixed m1, m2 and
-x2, the pooled-variance Z statistic is strictly increasing in x1 wherever it
+Rather than enumerating every responder pair (x1, x0) within each (m1, m0)
+cell, this implementation uses the following property. For fixed m1, m0 and
+x0, the pooled-variance Z statistic is strictly increasing in x1 wherever it
 is positive, so the rejection region is an upper set in x1 and is described by
-a single threshold c(m1, m2, x2). The conditional rejection probability is
-then obtained from upper binomial tail probabilities in one pass over x2. The
+a single threshold c(m1, m0, x0). The conditional rejection probability is
+then obtained from upper binomial tail probabilities in one pass over x0. The
 threshold is located as the larger root of the quadratic inequality equivalent
 to Z > z(1 - alpha) and is then verified against the defining inequality, so
 the thresholds are exact rather than approximate. This is a regrouping of the
@@ -114,29 +114,29 @@ differ from them by at most eps. The default \code{tol = 0} discards nothing.
 
 Under the null hypothesis a common conditional response probability
 
-p0_CC = (n1 p1_CC + n2 p2_CC) / (n1 + n2)
+pi_bar_CC = (n1 pi1_CC + n0 pi0_CC) / (n1 + n0)
 
 and a pooled dropout probability
 
-d0 = (n1 omega1 + n2 omega2) / (n1 + n2)
+omega_bar = (n1 omega1 + n0 omega0) / (n1 + n0)
 
 are used. The first of these is a convention rather than a property of the
 test: the size of a two-sample binomial test depends on the nuisance
-parameter, and \code{p_null} exists so that the dependence can be examined.
-The returned \code{p_null} column records the value used.
+parameter, and \code{pi_null} exists so that the dependence can be examined.
+The returned \code{pi_null} column records the value used.
 
-The rejection region depends only on (x1, x2, m1, m2) and is therefore
+The rejection region depends only on (x1, x0, m1, m0) and is therefore
 shared by the two hypotheses, so power and type I error rate are accumulated
 in a single pass.
 }
 \examples{
 # Within-group independence between response and dropout
-power_cc(n1 = 60, n2 = 60, p1 = 0.6, p2 = 0.4,
-         omega1 = 0.2, omega2 = 0.2, rho1 = 0, rho2 = 0, alpha = 0.025)
+power_cc(n1 = 60, n0 = 60, pi1 = 0.6, pi0 = 0.4,
+         omega1 = 0.2, omega0 = 0.2, rho1 = 0, rho0 = 0, alpha = 0.025)
 
 # Positive correlation: responders are more likely to drop out
-power_cc(n1 = 60, n2 = 60, p1 = 0.6, p2 = 0.4,
-         omega1 = 0.2, omega2 = 0.2, rho1 = 0.3, rho2 = 0.3)
+power_cc(n1 = 60, n0 = 60, pi1 = 0.6, pi0 = 0.4,
+         omega1 = 0.2, omega0 = 0.2, rho1 = 0.3, rho0 = 0.3)
 
 }
 \seealso{

@@ -4,16 +4,16 @@
 \alias{gamma_bounds}
 \title{Feasible Range of the Dropout Response Probability}
 \usage{
-gamma_bounds(p, omega)
+gamma_bounds(pi, omega)
 }
 \arguments{
-\item{p}{Numeric. Latent response probability, 0 < p < 1.}
+\item{pi}{Numeric. Latent response probability, 0 < pi < 1.}
 
 \item{omega}{Numeric. Dropout probability, 0 < omega < 1.}
 }
 \value{
 A \code{data.frame} of class \code{gamma_bounds} with one row
-containing \code{p}, \code{omega}, \code{gamma_lower}, \code{gamma_upper}
+containing \code{pi}, \code{omega}, \code{gamma_lower}, \code{gamma_upper}
 and the equivalent correlation bounds \code{rho_lower} and \code{rho_upper}.
 }
 \description{
@@ -25,15 +25,15 @@ cells be non-negative.
 }
 \details{
 With gamma = Pr(R = 1 | D = 1) the four joint cells are
-gamma omega, (1 - gamma) omega, p - gamma omega and 1 - p - omega +
+gamma omega, (1 - gamma) omega, pi - gamma omega and 1 - pi - omega +
 gamma omega. Requiring all four to be non-negative gives
 
-max(0, (p + omega - 1) / omega) <= gamma <= min(1, p / omega),
+max(0, (pi + omega - 1) / omega) <= gamma <= min(1, pi / omega),
 
 which is the whole of the Frechet-Prentice restriction. The correlation
 bounds of Prentice (1988) follow by applying \code{\link{gamma_to_rho}} to
-the two endpoints. The upper bound changes branch at omega = p and the lower
-bound at omega = 1 - p, exactly where the correlation bounds do.
+the two endpoints. The upper bound changes branch at omega = pi and the lower
+bound at omega = 1 - pi, exactly where the correlation bounds do.
 
 Reading the restriction on this scale makes its content plain. The upper
 bound binds when dropouts cannot all have responded because there are not
@@ -42,8 +42,8 @@ cannot all have failed to respond because there are not enough
 non-responders.
 }
 \examples{
-gamma_bounds(p = 0.45, omega = 0.10)
-gamma_bounds(p = 0.20, omega = 0.30)
+gamma_bounds(pi = 0.45, omega = 0.10)
+gamma_bounds(pi = 0.20, omega = 0.30)
 
 }
 \references{

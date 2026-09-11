@@ -178,12 +178,12 @@ target_power <- figS1_data$target_power
 
 s1_long <- bind_rows(
   s1 %>%
-    select(omega1, omega2, N_proposed, N_Simple) %>%
+    select(omega1, omega0, N_proposed, N_Simple) %>%
     pivot_longer(c(N_proposed, N_Simple), names_to = "method_raw",
                  values_to = "value") %>%
     mutate(metric = "Total sample size"),
   s1 %>%
-    select(omega1, omega2, power_proposed, power_Simple) %>%
+    select(omega1, omega0, power_proposed, power_Simple) %>%
     pivot_longer(c(power_proposed, power_Simple), names_to = "method_raw",
                  values_to = "value") %>%
     mutate(metric = "Exact power under NRI")
@@ -199,7 +199,7 @@ s1_long <- bind_rows(
 omega1_labels <- lapply(figS1_data$omega1_values,
                         function(x) bquote(omega[1] == .(x)))
 
-figS1 <- ggplot(s1_long, aes(x = omega2, y = value,
+figS1 <- ggplot(s1_long, aes(x = omega0, y = value,
                              color = omega1_factor, linetype = method)) +
   geom_line(linewidth = 1.2) +
   geom_hline(
@@ -215,7 +215,7 @@ figS1 <- ggplot(s1_long, aes(x = omega2, y = value,
                                    "Simple inflation" = "dashed")) +
   labs(
     x = expression(paste("Control group dropout probability (",
-                         omega[2], ")")),
+                         omega[0], ")")),
     y = NULL,
     color = "Treatment group dropout",
     linetype = "Method"
@@ -232,18 +232,18 @@ s2 <- figS2_data$df
 alpha <- figS2_data$alpha
 
 s2_long <- bind_rows(
-  s2 %>% transmute(p, omega2, value = effect_NRI, metric = "NRI effect"),
-  s2 %>% transmute(p, omega2, value = reject_full_null,
+  s2 %>% transmute(pi, omega0, value = effect_NRI, metric = "NRI effect"),
+  s2 %>% transmute(pi, omega0, value = reject_full_null,
                    metric = "Rejection probability")
 ) %>%
   mutate(
     metric = factor(metric, levels = c("NRI effect", "Rejection probability")),
-    p_factor = factor(p)
+    pi_factor = factor(pi)
   )
 
-p_labels <- lapply(figS2_data$p_values, function(x) bquote(p == .(x)))
+pi_labels <- lapply(figS2_data$pi_values, function(x) bquote(pi == .(x)))
 
-figS2 <- ggplot(s2_long, aes(x = omega2, y = value, color = p_factor)) +
+figS2 <- ggplot(s2_long, aes(x = omega0, y = value, color = pi_factor)) +
   geom_line(linewidth = 1.2) +
   geom_vline(xintercept = figS2_data$omega1, color = "gray40",
              linetype = "longdash", linewidth = 1) +
@@ -258,12 +258,12 @@ figS2 <- ggplot(s2_long, aes(x = omega2, y = value, color = p_factor)) +
     color = "gray", linetype = "longdash", linewidth = 1
   ) +
   facet_wrap(vars(metric), scales = "free_y", nrow = 1) +
-  scale_color_manual(values = OKABE[seq_along(figS2_data$p_values)],
-                     breaks = figS2_data$p_values,
-                     labels = p_labels) +
+  scale_color_manual(values = OKABE[seq_along(figS2_data$pi_values)],
+                     breaks = figS2_data$pi_values,
+                     labels = pi_labels) +
   labs(
     x = expression(paste("Control group dropout probability (",
-                         omega[2], ")")),
+                         omega[0], ")")),
     y = NULL,
     color = "Common latent response probability"
   ) +
@@ -282,13 +282,13 @@ s3 <- figS3_data$df
 # scale. That puts RE = 1 at the centre, gives a halving and a doubling the
 # same visual weight, and keeps the number of colour bands small. The colour
 # bar is labelled with the relative efficiency itself, not its logarithm.
-s3_map <- data.frame(x = s3$rho1, y = s3$rho2, log2re = log2(s3$re))
+s3_map <- data.frame(x = s3$rho1, y = s3$rho0, log2re = log2(s3$re))
 
 figS3 <- contour_map(
   s3_map, "log2re", palette = RE_PALETTE, step = 0.5, centre = 0,
   legend_title = expression(RE == N[CC] / N[NRI]),
   xlab = expression(paste("Treatment group correlation (", rho[1], ")")),
-  ylab = expression(paste("Control group correlation (", rho[2], ")")),
+  ylab = expression(paste("Control group correlation (", rho[0], ")")),
   label_fun = function(b) formatC(2 ^ b, digits = 2, format = "f")
 ) +
   # Every point with a relative efficiency above one lies off this line, so the
@@ -309,11 +309,11 @@ s4 <- filter(figS45_data$df, panel == "dropout")
 
 figS4 <- contour_map(
   s4, "diff", palette = DIVERGING, step = 0.04, centre = 0,
-  legend_title = expression(delta[NRI] - delta[Trad]),
+  legend_title = expression(delta[NRI] - delta[Full]),
   xlab = expression(paste("Treatment group dropout probability (",
                           omega[1], ")")),
   ylab = expression(paste("Control group dropout probability (",
-                          omega[2], ")"))
+                          omega[0], ")"))
 )
 
 save_figure(figS4, "FigureS4", width = 12, height = 12)
@@ -326,9 +326,9 @@ s5 <- filter(figS45_data$df, panel == "correlation")
 
 figS5 <- contour_map(
   s5, "diff", palette = DIVERGING, step = 0.025, centre = 0,
-  legend_title = expression(delta[NRI] - delta[Trad]),
+  legend_title = expression(delta[NRI] - delta[Full]),
   xlab = expression(paste("Treatment group correlation (", rho[1], ")")),
-  ylab = expression(paste("Control group correlation (", rho[2], ")"))
+  ylab = expression(paste("Control group correlation (", rho[0], ")"))
 ) +
   annotate("point", x = 0, y = 0, size = 4, shape = 21,
            fill = "white", colour = "black")
@@ -426,13 +426,13 @@ S7_COLOURS <- c(
   "Dropouts counted as responders"     = "#D55E00"
 )
 
-figS7 <- ggplot(s7, aes(x = p2, y = RE, colour = rule)) +
+figS7 <- ggplot(s7, aes(x = pi0, y = RE, colour = rule)) +
   geom_hline(yintercept = 1, linetype = "dashed", colour = "grey40") +
   geom_line(linewidth = 1.2, na.rm = TRUE) +
   facet_wrap(vars(convention), nrow = 1) +
   scale_colour_manual(values = S7_COLOURS) +
   labs(
-    x = expression(paste("Candidate latent response probability ", p[2])),
+    x = expression(paste("Candidate latent response probability ", pi[0])),
     y = expression(paste("RE = ", N[CC], " / ", N[NRI])),
     colour = NULL
   ) +
@@ -480,9 +480,9 @@ tabS1 <- c(
   "  \\begin{tabular}{cccccccccrrr}",
   "    \\toprule",
   paste0(
-    "    $p_{1}$ & $p_{2}$ & $\\omega$ & $\\rho$ & ",
-    "$\\gamma_{1}$ & $\\gamma_{2}$ & ",
-    "$p_{1,\\mathrm{NRI}}$ & $p_{2,\\mathrm{NRI}}$ & ",
+    "    $\\pi_{1}$ & $\\pi_{0}$ & $\\omega$ & $\\rho$ & ",
+    "$\\gamma_{1}$ & $\\gamma_{0}$ & ",
+    "$\\pi_{1,\\mathrm{NRI}}$ & $\\pi_{0,\\mathrm{NRI}}$ & ",
     "$\\delta_{\\mathrm{NRI}}$ & $N_{\\mathrm{CC}}$ & ",
     "$N_{\\mathrm{NRI}}$ & RE \\\\"
   ),
@@ -491,17 +491,17 @@ tabS1 <- c(
 
 prev_key <- ""
 for (k in seq_len(nrow(t1))) {
-  key <- paste(t1$p1[k], t1$p2[k], t1$omega[k])
+  key <- paste(t1$pi1[k], t1$pi0[k], t1$omega[k])
   first <- key != prev_key
   if (first && k > 1) tabS1 <- c(tabS1, "    \\addlinespace")
   tabS1 <- c(tabS1, paste0(
     "    ",
-    if (first) fmt2(t1$p1[k]) else "", " & ",
-    if (first) fmt2(t1$p2[k]) else "", " & ",
+    if (first) fmt2(t1$pi1[k]) else "", " & ",
+    if (first) fmt2(t1$pi0[k]) else "", " & ",
     if (first) fmt2(t1$omega[k]) else "", " & ",
     rho_cell(t1$rho_label[k], t1$rho[k]), " & ",
-    fmt3(t1$gamma1[k]), " & ", fmt3(t1$gamma2[k]), " & ",
-    fmt4(t1$p1_NRI[k]), " & ", fmt4(t1$p2_NRI[k]), " & ",
+    fmt3(t1$gamma1[k]), " & ", fmt3(t1$gamma0[k]), " & ",
+    fmt4(t1$pi1_NRI[k]), " & ", fmt4(t1$pi0_NRI[k]), " & ",
     fmt4(t1$effect_NRI[k]), " & ",
     if (first) fmt_i(t1$N_cc[k]) else "", " & ",
     fmt_i(t1$N_nri[k]), " & ", fmt2(t1$RE[k]), " \\\\"
@@ -517,7 +517,7 @@ tabS1 <- c(
   paste0(
     "    \\item $L$ and $U$ denote the lower and upper attainable values of ",
     "$\\rho$ given the marginal probabilities, and ",
-    "$\\gamma_{j} = \\Pr(R_{j} = 1 \\mid D_{j} = 1)$ is the same ",
+    "$\\gamma_{j} = \\Pr(R_{ij} = 1 \\mid D_{ij} = 1)$ is the same ",
     "assumption expressed as the probability that a dropout in group $j$ ",
     "would have responded. ",
     "RE $= N_{\\mathrm{CC}} / N_{\\mathrm{NRI}}$."
@@ -549,7 +549,7 @@ tabS2 <- c(
   "  \\begin{tabular}{ccccrrr}",
   "    \\toprule",
   paste0(
-    "    $p_{1}$ & $p_{2}$ & $\\omega$ & $r$ & ",
+    "    $\\pi_{1}$ & $\\pi_{0}$ & $\\omega$ & $r$ & ",
     "$N_{\\mathrm{CC}}$ & $N_{\\mathrm{NRI}}$ & RE \\\\"
   ),
   "    \\midrule"
@@ -557,13 +557,13 @@ tabS2 <- c(
 
 prev_key <- ""
 for (k in seq_len(nrow(t2))) {
-  key <- paste(t2$p1[k], t2$p2[k], t2$omega[k])
+  key <- paste(t2$pi1[k], t2$pi0[k], t2$omega[k])
   first <- key != prev_key
   if (first && k > 1) tabS2 <- c(tabS2, "    \\addlinespace")
   tabS2 <- c(tabS2, paste0(
     "    ",
-    if (first) fmt2(t2$p1[k]) else "", " & ",
-    if (first) fmt2(t2$p2[k]) else "", " & ",
+    if (first) fmt2(t2$pi1[k]) else "", " & ",
+    if (first) fmt2(t2$pi0[k]) else "", " & ",
     if (first) fmt2(t2$omega[k]) else "", " & ",
     formatC(t2$r[k], format = "g"), " & ",
     fmt_i(t2$N_cc[k]), " & ", fmt_i(t2$N_nri[k]), " & ",
@@ -577,7 +577,7 @@ tabS2 <- c(
   "    \\bottomrule",
   "  \\end{tabular}",
   "  \\begin{tablenotes}[flushleft]\\footnotesize",
-  "    \\item $r = n_{1} / n_{2}$. RE $= N_{\\mathrm{CC}} / N_{\\mathrm{NRI}}$.",
+  "    \\item $r = n_{1} / n_{0}$. RE $= N_{\\mathrm{CC}} / N_{\\mathrm{NRI}}$.",
   "  \\end{tablenotes}",
   "  \\end{threeparttable}",
   "\\end{table}"
@@ -596,11 +596,11 @@ tabS3 <- c(
   "  \\centering",
   paste0(
     "  \\caption{Exact type I error rate as a function of the common response ",
-    "probability assumed under the null hypothesis, at $n_{1} = n_{2} = ",
-    tableS3_data$n1, "$ with $p_{1} = ", fmt2(tableS3_data$p1),
-    "$, $p_{2} = ", fmt2(tableS3_data$p2),
-    "$, $\\omega_{1} = \\omega_{2} = ", fmt2(tableS3_data$omega),
-    "$, $\\rho_{1} = \\rho_{2} = 0$ and $\\alpha = ", tableS3_data$alpha,
+    "probability assumed under the null hypothesis, at $n_{1} = n_{0} = ",
+    tableS3_data$n1, "$ with $\\pi_{1} = ", fmt2(tableS3_data$pi1),
+    "$, $\\pi_{0} = ", fmt2(tableS3_data$pi0),
+    "$, $\\omega_{1} = \\omega_{0} = ", fmt2(tableS3_data$omega),
+    "$, $\\rho_{1} = \\rho_{0} = 0$ and $\\alpha = ", tableS3_data$alpha,
     "$ (one-sided). The size of a two-sample binomial test is not constant in ",
     "this nuisance parameter, so no single value establishes size control.}"
   ),
@@ -619,7 +619,7 @@ for (k in seq_len(nrow(t3))) {
   tabS3 <- c(tabS3, paste0(
     "    ",
     if (first) t3$analysis[k] else "", " & ",
-    fmt4(t3$p_null[k]),
+    fmt4(t3$pi_null[k]),
     if (t3$is_default[k]) " (weighted average)" else "", " & ",
     fmt4(t3$type1_error[k]), " \\\\"
   ))
@@ -657,9 +657,9 @@ tabS4 <- c(
   paste0(
     "  \\caption{Exact power of a complete case analysis when the two dropout ",
     "probabilities differ and each group is inflated by its own dropout ",
-    "probability. Design parameters: $p_{1} = ",
-    fmt2(tableS4_data$p1), "$, $p_{2} = ", fmt2(tableS4_data$p2),
-    "$, $\\rho_{1} = \\rho_{2} = 0$, $r = 1$, $\\alpha = ",
+    "probability. Design parameters: $\\pi_{1} = ",
+    fmt2(tableS4_data$pi1), "$, $\\pi_{0} = ", fmt2(tableS4_data$pi0),
+    "$, $\\rho_{1} = \\rho_{0} = 0$, $r = 1$, $\\alpha = ",
     tableS4_data$alpha, "$ (one-sided) and target power $= ",
     tableS4_data$target_power,
     "$. The target power is attained throughout, so equal dropout ",
@@ -671,8 +671,8 @@ tabS4 <- c(
   "  \\begin{tabular}{ccrrrrr}",
   "    \\toprule",
   paste0(
-    "    $\\omega_{1}$ & $\\omega_{2}$ & $n_{\\mathrm{complete}}$ & ",
-    "$n_{1}$ & $n_{2}$ & Power & Type I error \\\\"
+    "    $\\omega_{1}$ & $\\omega_{0}$ & $n_{\\mathrm{complete}}$ & ",
+    "$n_{1}$ & $n_{0}$ & Power & Type I error \\\\"
   ),
   "    \\midrule"
 )
@@ -680,9 +680,9 @@ tabS4 <- c(
 for (k in seq_len(nrow(t4))) {
   tabS4 <- c(tabS4, paste0(
     "    ",
-    fmt2(t4$omega1[k]), " & ", fmt2(t4$omega2[k]), " & ",
+    fmt2(t4$omega1[k]), " & ", fmt2(t4$omega0[k]), " & ",
     fmt_i(t4$n_complete[k]), " & ",
-    fmt_i(t4$n1[k]), " & ", fmt_i(t4$n2[k]), " & ",
+    fmt_i(t4$n1[k]), " & ", fmt_i(t4$n0[k]), " & ",
     fmt4(t4$power[k]), " & ", fmt4(t4$type1_error[k]), " \\\\"
   ))
 }

@@ -1,3 +1,28 @@
+# ssNRI 0.2.0
+
+* The names now transliterate the article's notation, so every argument, column,
+  printed label and plot label corresponds one to one with a symbol in the
+  article.
+* The latent response probability is `pi`, written `pi1` and `pi0` for the two
+  groups, matching the article's `pi_j`. `p` becomes `pi`, `p_obs` becomes
+  `pi_obs`, `p1_NRI` becomes `pi1_NRI`, `p_lower` becomes `pi_lower`, and so on
+  throughout. The package does not use the constant `pi` anywhere, so nothing is
+  shadowed in a way that changes a result.
+* The experimental group is 1 and the control group is 0, matching the article.
+  `omega2` becomes `omega0`, `rho2` becomes `rho0`, `n2` becomes `n0`, and the
+  allocation ratio `r` is now `n1 / n0`. The argument order is unchanged, the
+  experimental group still coming first, so positional calls keep their meaning.
+* The quantity assumed under the null hypothesis is `pi_null`, and the pooled
+  values used internally are `pi_bar_CC` in `power_cc()`, `pi_bar` in
+  `power_nri()` and `omega_bar` for the pooled dropout probability. A 0 subscript
+  now means the control group and nothing else.
+* The column `effect_latent` is renamed `effect_full`, matching the article's
+  renaming of the dropout-free design from "traditional" to "full data".
+* Plot titles, subtitles and axis labels are drawn as plotmath, so they show the
+  Greek letters the article uses rather than their ASCII names.
+* This is a breaking change for every call that names an argument. No numerical
+  result changes; the renaming is confined to names.
+
 # ssNRI 0.1.0
 
 * Initial version.
@@ -22,10 +47,10 @@
   for given marginal probabilities.
 * `rho_to_gamma()`, `gamma_to_rho()` and `gamma_bounds()` express the same
   bivariate Bernoulli distribution through gamma, the probability of responding
-  among those who drop out. The NRI response probability is then p - gamma
+  among those who drop out. The NRI response probability is then pi - gamma
   omega, and the Frechet-Prentice restriction becomes the requirement that the
   four joint cells be non-negative.
-* `power_cc()` and `power_nri()` take `p_null`, the common response probability
+* `power_cc()` and `power_nri()` take `pi_null`, the common response probability
   assumed under the null hypothesis. The default reproduces the sample-size
   weighted average used previously; supplying a value makes the dependence of
   the size on this nuisance parameter visible.
