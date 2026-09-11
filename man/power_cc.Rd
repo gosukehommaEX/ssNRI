@@ -116,14 +116,13 @@ Under the null hypothesis a common conditional response probability
 
 pi_bar_CC = (n1 pi1_CC + n0 pi0_CC) / (n1 + n0)
 
-and a pooled dropout probability
-
-omega_bar = (n1 omega1 + n0 omega0) / (n1 + n0)
-
-are used. The first of these is a convention rather than a property of the
-test: the size of a two-sample binomial test depends on the nuisance
-parameter, and \code{pi_null} exists so that the dependence can be examined.
-The returned \code{pi_null} column records the value used.
+is used. This is a convention rather than a property of the test: the size of
+a two-sample binomial test depends on the nuisance parameter, and
+\code{pi_null} exists so that the dependence can be examined. The returned
+\code{pi_null} column records the value used. The dropout probabilities keep
+their group-specific values under the null, because the null hypothesis
+concerns the response probabilities and the dropout probabilities are design
+inputs that describe the conduct of the trial.
 
 The rejection region depends only on (x1, x0, m1, m0) and is therefore
 shared by the two hypotheses, so power and type I error rate are accumulated

@@ -191,7 +191,7 @@ s1_long <- bind_rows(
     mutate(metric = "Exact power under NRI")
 ) %>%
   mutate(
-    method = ifelse(grepl("Simple", method_raw), "Simple inflation",
+    method = ifelse(grepl("Simple", method_raw), "Complete case",
                     "NRI formula"),
     metric = factor(metric, levels = c("Total sample size",
                                        "Exact power under NRI")),
@@ -214,7 +214,7 @@ figS1 <- ggplot(s1_long, aes(x = omega0, y = value,
                      breaks = figS1_data$omega1_values,
                      labels = omega1_labels) +
   scale_linetype_manual(values = c("NRI formula" = "solid",
-                                   "Simple inflation" = "dashed")) +
+                                   "Complete case" = "dashed")) +
   labs(
     x = expression(paste("Control group dropout probability (",
                          omega[0], ")")),
@@ -665,8 +665,8 @@ tabS4 <- c(
     tableS4_data$alpha, "$ (one-sided) and target power $= ",
     tableS4_data$target_power,
     "$. The target power is attained throughout, so equal dropout ",
-    "probabilities are not necessary for the simple inflation method to be ",
-    "valid.}"
+    "probabilities are not necessary for a complete case design to reach ",
+    "its target.}"
   ),
   "  \\label{tab:unequal-dropout}",
   "  \\begin{threeparttable}",

@@ -85,14 +85,13 @@
 #'
 #'   pi_bar_CC = (n1 pi1_CC + n0 pi0_CC) / (n1 + n0)
 #'
-#' and a pooled dropout probability
-#'
-#'   omega_bar = (n1 omega1 + n0 omega0) / (n1 + n0)
-#'
-#' are used. The first of these is a convention rather than a property of the
-#' test: the size of a two-sample binomial test depends on the nuisance
-#' parameter, and \code{pi_null} exists so that the dependence can be examined.
-#' The returned \code{pi_null} column records the value used.
+#' is used. This is a convention rather than a property of the test: the size of
+#' a two-sample binomial test depends on the nuisance parameter, and
+#' \code{pi_null} exists so that the dependence can be examined. The returned
+#' \code{pi_null} column records the value used. The dropout probabilities keep
+#' their group-specific values under the null, because the null hypothesis
+#' concerns the response probabilities and the dropout probabilities are design
+#' inputs that describe the conduct of the trial.
 #'
 #' The rejection region depends only on (x1, x0, m1, m0) and is therefore
 #' shared by the two hypotheses, so power and type I error rate are accumulated
@@ -158,21 +157,20 @@ power_cc <- function(n1, n0, pi1, pi0, omega1, omega0,
   pi0_CC <- cells0[["pi_10"]] / (cells0[["pi_00"]] + cells0[["pi_10"]])
 
   # Null values: the response probability is pooled by default, otherwise as
-  # supplied; the dropout probability is always pooled
+  # supplied; the dropout probabilities are design inputs and are unchanged
   pi_bar_CC <- if (is.null(pi_null)) {
     (n1 * pi1_CC + n0 * pi0_CC) / (n1 + n0)
   } else {
     pi_null
   }
-  omega_bar <- (n1 * omega1 + n0 * omega0) / (n1 + n0)
 
   z_alpha <- qnorm(1 - alpha)
 
   # Completer-count distributions
   prob_m1_h1 <- dbinom(0:n1, n1, 1 - omega1)
   prob_m0_h1 <- dbinom(0:n0, n0, 1 - omega0)
-  prob_m1_h0 <- dbinom(0:n1, n1, 1 - omega_bar)
-  prob_m0_h0 <- dbinom(0:n0, n0, 1 - omega_bar)
+  prob_m1_h0 <- prob_m1_h1
+  prob_m0_h0 <- prob_m0_h1
 
   # Completer counts to enumerate; m = 0 is always excluded because the test
   # statistic is undefined when a group contributes no completers

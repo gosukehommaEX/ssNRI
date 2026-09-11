@@ -1,13 +1,13 @@
-data_generate_supplement.R log -- 2026-09-11 13:46:28
-Table S1 (application sensitivity)            0.6 sec
+data_generate_supplement.R log -- 2026-09-11 17:04:08
+Table S1 (application sensitivity)            0.2 sec
 Figure S1 (unequal dropout, alternative)      1.4 sec
-Figure S2 (unequal dropout, full-data null)      0.7 sec
-Figure S3 (unequal correlations)              8.1 sec
-Figure S3 diagonal (rho1 = rho0)              0.2 sec
-Figures S4 and S5 (effect ordering)           0.1 sec
-Figure S6 (conservative dropout)              0.5 sec
-Table S2 (allocation ratio)                   0.3 sec
-Table S3 (null nuisance parameter)           35.3 sec
-Table S4 (unequal dropout counterexample)     34.2 sec
-Figure S7 (partial identification)            3.3 sec
+Figure S2 (unequal dropout, full-data null)      0.6 sec
+Figure S3 (unequal correlations)              7.9 sec
+Figure S3 diagonal (rho1 = rho0)              0.3 sec
+Figures S4 and S5 (effect ordering)           0.3 sec
+Figure S6 (conservative dropout)              0.3 sec
+Table S2 (allocation ratio)                   0.4 sec
+Table S3 (null nuisance parameter)           30.6 sec
+Table S4 (unequal dropout counterexample)     31.8 sec
+Figure S7 (partial identification)            2.2 sec
 All supplementary data written to 'data/'.

@@ -39,12 +39,11 @@ test_that("power_cc agrees with a direct double enumeration", {
     pi1_CC <- pi1_10 / (pi1_00 + pi1_10)
     pi0_CC <- pi0_10 / (pi0_00 + pi0_10)
     pi_bar_CC <- (n1 * pi1_CC + n0 * pi0_CC) / (n1 + n0)
-    omega_bar <- (n1 * omega1 + n0 * omega0) / (n1 + n0)
     z <- stats::qnorm(1 - alpha)
+    # the null hypothesis concerns the response probabilities only, so the
+    # completer counts keep the group-specific dropout probabilities
     pm1 <- stats::dbinom(0:n1, n1, 1 - omega1)
     pm0 <- stats::dbinom(0:n0, n0, 1 - omega0)
-    qm1 <- stats::dbinom(0:n1, n1, 1 - omega_bar)
-    qm0 <- stats::dbinom(0:n0, n0, 1 - omega_bar)
     pw <- 0
     t1 <- 0
     for (m1 in 1:n1) {
@@ -59,7 +58,7 @@ test_that("power_cc agrees with a direct double enumeration", {
         pw <- pw + pm1[m1 + 1] * pm0[m0 + 1] *
           sum(outer(stats::dbinom(x1, m1, pi1_CC),
                     stats::dbinom(x0, m0, pi0_CC)) * rej)
-        t1 <- t1 + qm1[m1 + 1] * qm0[m0 + 1] *
+        t1 <- t1 + pm1[m1 + 1] * pm0[m0 + 1] *
           sum(outer(stats::dbinom(x1, m1, pi_bar_CC),
                     stats::dbinom(x0, m0, pi_bar_CC)) * rej)
       }
