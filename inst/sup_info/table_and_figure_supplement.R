@@ -111,9 +111,11 @@ write_tex <- function(lines, path) {
   message("wrote ", path)
 }
 
-fmt4 <- function(x) formatC(x, digits = 4, format = "f")
-fmt2 <- function(x) formatC(x, digits = 2, format = "f")
-fmt3 <- function(x) formatC(x, digits = 3, format = "f")
+# formatC keeps the sign of a value that rounds to zero, which prints as "-0.000"
+zap_neg_zero <- function(x, digits) ifelse(abs(x) < 0.5 * 10 ^ (-digits), 0, x)
+fmt4 <- function(x) formatC(zap_neg_zero(x, 4), digits = 4, format = "f")
+fmt2 <- function(x) formatC(zap_neg_zero(x, 2), digits = 2, format = "f")
+fmt3 <- function(x) formatC(zap_neg_zero(x, 3), digits = 3, format = "f")
 fmt_i <- function(x) formatC(x, format = "d", big.mark = ",")
 
 # Shared builder for the filled contour maps.

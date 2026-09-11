@@ -372,10 +372,12 @@ save_figure(fig3, "Figure3")
 
 t2 <- table2_data$df
 
-fmt_p <- function(x) formatC(x, digits = 4, format = "f")
+# formatC keeps the sign of a value that rounds to zero, which prints as "-0.000"
+zap_neg_zero <- function(x, digits) ifelse(abs(x) < 0.5 * 10 ^ (-digits), 0, x)
+fmt_p <- function(x) formatC(zap_neg_zero(x, 4), digits = 4, format = "f")
 fmt_i <- function(x) formatC(x, format = "d", big.mark = ",")
-fmt_re <- function(x) formatC(x, digits = 2, format = "f")
-fmt_g <- function(x) formatC(x, digits = 3, format = "f")
+fmt_re <- function(x) formatC(zap_neg_zero(x, 2), digits = 2, format = "f")
+fmt_g <- function(x) formatC(zap_neg_zero(x, 3), digits = 3, format = "f")
 
 rho_cell <- function(label, value) {
   if (label == "L") {
