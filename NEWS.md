@@ -1,3 +1,20 @@
+# ssNRI 0.2.1
+
+* `power_cc()` no longer pools the dropout probabilities under the null
+  hypothesis. The null hypothesis is a statement about the response probability,
+  so only that is replaced by the pooled value; the dropout probabilities are
+  design inputs and stay at `omega1` and `omega0`. This changes the reported
+  type I error rate when the two dropout probabilities differ and changes nothing
+  when they are equal.
+* `gamma_to_rho()` now rejects a `gamma` outside the interval implied by `pi` and
+  `omega`, which is narrower than the unit interval. Such a value maps to a
+  correlation outside the Frechet-Prentice range and would put a negative
+  probability on one of the four joint cells.
+* The Python script that produces the reference values used by the tests is
+  included as `inst/reference/generate_reference_values.py`, so the claim that
+  those values come from an independent implementation can be checked from the
+  package itself.
+
 # ssNRI 0.2.0
 
 * The names now transliterate the article's notation, so every argument, column,

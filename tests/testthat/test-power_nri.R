@@ -1,6 +1,8 @@
 # Reference values in ref_power_nri.csv were produced by an independent
 # implementation written in Python (SciPy) that enumerates the full outcome
-# matrix, so the check crosses both language and summation order.
+# matrix, so the check crosses both language and summation order. The script
+# that produces them is inst/reference/generate_reference_values.py; it is coded
+# from the formulas in the article and does not load this package.
 
 ref_nri <- utils::read.csv(
   testthat::test_path("ref_power_nri.csv"),

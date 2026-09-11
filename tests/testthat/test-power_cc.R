@@ -2,7 +2,9 @@
 # implementation written in Python (SciPy), using the full double enumeration
 # over completer counts and responder counts. They therefore check the R
 # implementation against a different language and a different summation order,
-# not merely against itself.
+# not merely against itself. The script that produces them is
+# inst/reference/generate_reference_values.py; it is coded from the formulas in
+# the article and does not load this package.
 
 ref <- utils::read.csv(
   testthat::test_path("ref_power_cc.csv"),

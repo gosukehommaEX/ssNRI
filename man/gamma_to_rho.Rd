@@ -30,7 +30,13 @@ rho = (gamma - pi) sqrt(omega / (pi (1 - pi) (1 - omega))).
 
 Values of gamma admissible for the given marginal probabilities map into the
 Frechet-Prentice range returned by \code{\link{rho_bounds}}; see
-\code{\link{gamma_bounds}}.
+\code{\link{gamma_bounds}}. The marginal probabilities restrict gamma more
+tightly than the unit interval, to
+
+max(0, (pi + omega - 1) / omega) <= gamma <= min(1, pi / omega),
+
+and gamma outside that range is rejected, because the implied correlation
+would put a negative probability on one of the four joint cells.
 }
 \examples{
 gamma_to_rho(pi = 0.45, omega = 0.10, gamma = 0.45)

@@ -130,6 +130,12 @@ test_that("the gamma functions reject invalid input", {
   expect_error(rho_to_gamma(pi = 0.4, omega = 0, rho = 0), "omega must be")
   expect_error(rho_to_gamma(pi = 0.4, omega = 0.1, rho = NA), "finite")
   expect_error(gamma_to_rho(pi = 0.4, omega = 0.1, gamma = 1.2), "gamma must be")
+  # the margins are narrower than the unit interval: pi / omega = 0.5 in the
+  # first case, and a larger gamma leaves a negative (response, dropout) cell
+  expect_error(gamma_to_rho(pi = 0.05, omega = 0.1, gamma = 0.8),
+               "bounds implied by pi and omega")
+  expect_error(gamma_to_rho(pi = 0.95, omega = 0.1, gamma = 0.2),
+               "bounds implied by pi and omega")
   expect_error(gamma_bounds(pi = 0.4, omega = 1), "omega must be")
   expect_error(gamma_bounds(pi = c(0.4, 0.5), omega = 0.1), "length one")
 })
