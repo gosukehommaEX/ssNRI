@@ -376,6 +376,9 @@ t2 <- table2_data$df
 zap_neg_zero <- function(x, digits) ifelse(abs(x) < 0.5 * 10 ^ (-digits), 0, x)
 fmt_p <- function(x) formatC(zap_neg_zero(x, 4), digits = 4, format = "f")
 fmt_i <- function(x) formatC(x, format = "d", big.mark = ",")
+# a comma is punctuation in math mode and takes a thin space after it, so the
+# thousands separator has to be braced when the number is set inside $ $
+fmt_i_math <- function(x) gsub(",", "{,}", fmt_i(x), fixed = TRUE)
 fmt_re <- function(x) formatC(zap_neg_zero(x, 2), digits = 2, format = "f")
 fmt_g <- function(x) formatC(zap_neg_zero(x, 3), digits = 3, format = "f")
 
@@ -409,8 +412,8 @@ tab2_lines <- c(
     "$, $\\alpha = ", table2_data$alpha,
     "$ (one-sided) and target power $= ", table2_data$target_power,
     "$. The simple inflation method gives $N_{\\mathrm{CC}} = ",
-    fmt_i(t2$N_cc[1]),
-    "$, which is the sample size the trial enrolled.}"
+    fmt_i_math(t2$N_cc[1]),
+    "$, which is the sample size the trial planned; it enrolled 2,472.}"
   ),
   "  \\label{tab:application}",
   "  \\begin{threeparttable}",
@@ -447,8 +450,11 @@ tab2_lines <- c(
   "  \\end{tabular}",
   "  \\begin{tablenotes}[flushleft]\\footnotesize",
   paste0(
-    "    \\item $L$ and $U$ denote the lower and upper attainable values of ",
-    "$\\rho$ given the marginal probabilities. ",
+    "    \\item $L$ and $U$ denote the lower and upper values of $\\rho$ ",
+    "attainable in both groups at once, that is the endpoints of the ",
+    "intersection of the two Prentice intervals; here $L$ is the lower ",
+    "endpoint for the placebo group and $U$ the upper endpoint for the ",
+    "cytisine group. ",
     "$\\gamma_{j} = \\Pr(R_{ij} = 1 \\mid D_{ij} = 1)$ is the probability ",
     "that a dropout in group $j$ would have responded, which is the same ",
     "assumption as $\\rho$ expressed on the probability scale; a common ",

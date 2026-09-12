@@ -1,11 +1,11 @@
-data_generate_main.R log -- 2026-09-12 15:54:47
-Figure 1 (CC validity)                151.9 sec
+data_generate_main.R log -- 2026-09-12 16:40:14
+Figure 1 (CC validity)                103.9 sec
 Figure 2 correlation grid: 574 points
-Figure 2 (NRI vs simple inflation)      9.0 sec
-Figure 3 (relative efficiency)         51.6 sec
-Table 2 (cytisine application)          0.6 sec
+Figure 2 (NRI vs simple inflation)      6.6 sec
+Figure 3 (relative efficiency)         30.9 sec
+Table 2 (cytisine application)          0.2 sec
 N_CC reproduces the sample size reported by Dogar et al. (2388)
-Application (realized design power)      0.3 sec
+Application (realized design power)      0.1 sec
 Exact NRI power at the planned size  (2388) = 0.7720
 Exact NRI power at the enrolled size (2472) = 0.7838
 Exact NRI power at the required size (2574) = 0.8014
