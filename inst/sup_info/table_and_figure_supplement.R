@@ -636,7 +636,7 @@ tabS3 <- c(
   paste0(
     "    \\item The sample size is the one the NRI formula gives under these ",
     "assumptions. For the NRI analysis the assumed probability is on the NRI ",
-    "scale; for the complete case analysis it is the conditional response ",
+    "scale; for the CC~analysis it is the conditional response ",
     "probability among completers. The row marked as the weighted average is ",
     "the convention used in the main text."
   ),
@@ -657,7 +657,7 @@ tabS4 <- c(
   "\\begin{table}[htbp]",
   "  \\centering",
   paste0(
-    "  \\caption{Exact power of a complete case analysis when the two dropout ",
+    "  \\caption{Exact power of a CC~analysis when the two dropout ",
     "probabilities differ and each group is inflated by its own dropout ",
     "probability. Design parameters: $\\pi_{1} = ",
     fmt2(tableS4_data$pi1), "$, $\\pi_{0} = ", fmt2(tableS4_data$pi0),
@@ -665,7 +665,7 @@ tabS4 <- c(
     tableS4_data$alpha, "$ (one-sided) and target power $= ",
     tableS4_data$target_power,
     "$. The target power is attained throughout, so equal dropout ",
-    "probabilities are not necessary for a complete case design to reach ",
+    "probabilities are not necessary for a CC~design to reach ",
     "its target.}"
   ),
   "  \\label{tab:unequal-dropout}",

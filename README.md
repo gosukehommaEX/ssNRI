@@ -135,7 +135,7 @@ sample_size_nri(pi1 = lb$pi_lower + 0.06, pi0 = lb$pi_lower,
 ## Reproducing the article
 
 `inst/scripts/` regenerates the figures and tables of the main text and
-`inst/sup_info/` those of the supplementary material. Each is split into a
+`inst/sup_info/` those of the Supporting Information. Each is split into a
 computation stage that writes intermediate results to `data/*.rds` and a
 rendering stage that reads those files and writes `results/*.eps`,
 `results/*.pdf` and `results/*.tex`, so figures can be adjusted without
@@ -156,6 +156,18 @@ source("data_generate_supplement.R")
 source("table_and_figure_supplement.R")
 setwd("../..")
 source("inst/scripts/number_check.R")
+```
+
+`inst/reference/generate_reference_values.py` produces the two CSV files of
+reference values that `tests/testthat/test-power_cc.R` and
+`tests/testthat/test-power_nri.R` compare the R implementation against. It is
+written in Python from the formulas printed in the article and does not load
+this package, so the tests check the implementation against a different
+language and a different summation order rather than against itself. It needs
+numpy and scipy, and is run from the package root.
+
+``` sh
+python inst/reference/generate_reference_values.py
 ```
 
 ## License
